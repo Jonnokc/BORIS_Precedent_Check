@@ -30,11 +30,9 @@ def fuzzy_matching(s1, array):
 # headers representing data needed
 exc_headers = [
     'RAW_CODE_DISPLAY', 'RAW_CODE_SYSTEM_NAME', 'PRECEDENT_ANALYSIS',
-    'PRECEDENT_MATCH', 'PRECEDENT_SIMILARITY'
-]
+    'PRECEDENT_MATCH', 'PRECEDENT_SIMILARITY']
 acc_headers = [
-    'Raw Code Display', 'Map Count', 'Precedent Raw Code System ID(s)'
-]
+    'Raw Code Display', 'Map Count', 'Precedent Raw Code System ID(s)']
 
 # start time used to determine program completion
 start_time = timeit.default_timer()
@@ -52,8 +50,7 @@ excel_workbook_location = (
 access_workbook_location = (
     "C:/Users/ja052464/Downloads/All_Validated_With_Counts.csv")
 keywords_workbook_location = (
-    "Y:\\Data Intelligence\\Code_Database\\Proprietary_Code_Display_Keywords.csv"
-)
+    "Y:\\Data Intelligence\\Code_Database\\Proprietary_Code_Display_Keywords.csv")
 
 # save path
 path = "C:\\Users\\ja052464\\Downloads\\"
