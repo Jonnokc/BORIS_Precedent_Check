@@ -179,9 +179,9 @@ for row in exc_d.itertuples():
         prec_analysis = "Low Probability. No Keyword"
 
     Code_elapsed = timeit.default_timer() - code_time
-    rows_left = total_excel_rows - i
+    rows_left = (total_excel_rows - i)
 
-    print("Best match for %s is %s. Score was %.2f. It took %.2f sec to calculate. % rows left." %
+    print("Best match for %s is %s. Score was %.2f. It took %.2f sec to calculate. %i rows remaining." %
           (unmapped, best_display, best_score, Code_elapsed, rows_left))
 
     # write to dataFrame
