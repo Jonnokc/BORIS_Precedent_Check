@@ -30,7 +30,7 @@ def fuzzy_matching(s1, array):
 # headers representing data needed
 exc_headers = [
     'RAW_CODE_DISPLAY', 'RAW_CODE_SYSTEM_NAME', 'PRECEDENT_ANALYSIS',
-    'PRECEDENT_MATCH', 'PRECEDENT_SIMILARITY']
+    'PRECEDENT_MATCH', 'PRECEDENT_SIMILARITY', 'PRECEDENT_MAP_COUNT', "PRECEDENT_CONCEPT_ALIAS"]
 acc_headers = [
     'Raw Code Display', 'Map Count', 'Precedent Raw Code System ID(s)']
 
@@ -46,9 +46,9 @@ start_time = timeit.default_timer()
 
 # file paths
 excel_workbook_location = (
-    "C:/Users/ja052464/Downloads/Testing_Python_Similarity4.csv")
+    "C:\\Users\\ja052464\\OneDrive - Cerner Corporation\\Documents\\NMHS_NE Phase 1 Unmapped Coes To Review.csv")
 access_workbook_location = (
-    "C:/Users/ja052464/Downloads/All_Validated_With_Counts.csv")
+    "C:\\Users\\ja052464\\OneDrive - Cerner Corporation\\Documents\\All_Validated_With_Counts.csv")
 keywords_workbook_location = (
     "Y:\\Data Intelligence\\Code_Database\\Proprietary_Code_Display_Keywords.csv")
 
@@ -58,6 +58,7 @@ path = "C:\\Users\\ja052464\\Downloads\\"
 # read in the needed files
 exc_d = pd.read_csv(
     excel_workbook_location,
+    encoding='iso-8859-1',
     dtype={exc_headers[0]: str,
            exc_headers[1]: str,
            exc_headers[2]: str}).astype(str)
@@ -102,6 +103,10 @@ for header in range(len(exc_headers)):
 total_access_rows = acc_d['Raw Code Display'].count()
 total_excel_rows = exc_d['RAW_CODE_DISPLAY'].count()
 
+# strips and formats the data.
+exc_d[exc_headers[0]] = exc_d[exc_headers[0]].str.strip()
+acc_d[acc_headers[0]] = acc_d[acc_headers[0]].str.strip()
+
 # calculate expected completion time
 expected_time = (total_excel_rows * 5) / 60
 
@@ -119,15 +124,17 @@ print(
 # Loops throw the currently unmapped raw code displays and checks it against the previously mapped displays.
 for row in exc_d.itertuples():
     i = row[0]
-    unmapped = row[1]
-    un_code_sys = row[2]
-    unmapped_code_split = row[1].split()
+    unmapped = row[6]
+    un_code_sys = row[9]
+    unmapped_code_split = row[6].split()
     best_score = 0
     best_display = ""
     prec_analysis = ""
     code_time = timeit.default_timer()
 
     for j in acc_d.itertuples():
+        map_count = j[2]
+        concept_alias = j[4]
 
         # Very quick way of looping and excluding low probability matches
         score = Levenshtein.ratio(unmapped, j[1])
@@ -172,11 +179,18 @@ for row in exc_d.itertuples():
         prec_analysis = "Low Probability. No Keyword"
 
     Code_elapsed = timeit.default_timer() - code_time
+    rows_left = total_excel_rows - i
+
+    print("Best match for %s is %s. Score was %.2f. It took %.2f sec to calculate. % rows left." %
+          (unmapped, best_display, best_score, Code_elapsed, rows_left))
 
     # write to dataFrame
-    exc_d.set_value(i, ['Python_Match'], best_display)
-    exc_d.set_value(i, ['Python_Similarity'], best_score)
-    exc_d.set_value(i, ['PRECEDENT_ANALYSIS'], prec_analysis)
+    exc_d.set_value(i, [exc_headers[3]], best_display)
+    exc_d.set_value(i, [exc_headers[4]], best_score)
+    exc_d.set_value(i, [exc_headers[2]], prec_analysis)
+    exc_d.set_value(i, [exc_headers[5]], j[2])
+    exc_d.set_value(i, [exc_headers[6]], j[4])
+
 
 elapsed = (timeit.default_timer() - start_time) / 60
 
