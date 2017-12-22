@@ -20,12 +20,26 @@
   </component>
   <component name="FileEditorManager">
     <leaf>
-      <file leaf-file-name="Python_testing_Fuzzy.py" pinned="false" current-in-tab="true">
+      <file leaf-file-name="Python_testing_Fuzzy.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/Python_testing_Fuzzy.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="102">
-              <caret line="6" column="27" lean-forward="true" selection-start-line="6" selection-start-column="27" selection-end-line="6" selection-end-column="27" />
-              <folding />
+            <state relative-caret-position="-1026">
+              <caret line="105" column="10" lean-forward="true" selection-start-line="105" selection-start-column="10" selection-end-line="105" selection-end-column="10" />
+              <folding>
+                <element signature="e#41#60#0" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="new_util.py" pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/new_util.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="399">
+              <caret line="141" column="28" lean-forward="false" selection-start-line="141" selection-start-column="28" selection-end-line="141" selection-end-column="28" />
+              <folding>
+                <element signature="e#41#80#0" expanded="true" />
+              </folding>
             </state>
           </provider>
         </entry>
@@ -71,8 +85,8 @@
         <option value="$PROJECT_DIR$/fuzzywuzzy/fuzz.py" />
         <option value="$PROJECT_DIR$/new_process.py" />
         <option value="$PROJECT_DIR$/text.py" />
-        <option value="$PROJECT_DIR$/new_util.py" />
         <option value="$PROJECT_DIR$/Python_testing_Fuzzy.py" />
+        <option value="$PROJECT_DIR$/new_util.py" />
       </list>
     </option>
   </component>
@@ -321,7 +335,14 @@
       <option name="project" value="LOCAL" />
       <updated>1513916688780</updated>
     </task>
-    <option name="localTasksCounter" value="9" />
+    <task id="LOCAL-00009" summary="additional improves to dynamic indexing.">
+      <created>1513931112758</created>
+      <option name="number" value="00009" />
+      <option name="presentableId" value="LOCAL-00009" />
+      <option name="project" value="LOCAL" />
+      <updated>1513931112758</updated>
+    </task>
+    <option name="localTasksCounter" value="10" />
     <servers />
   </component>
   <component name="TodoView">
@@ -406,7 +427,8 @@
     <MESSAGE value="resolve print issue" />
     <MESSAGE value="rebuilt dynamic column headers&#10;added logic to filter data in advance of analysis to improve speed comparisons." />
     <MESSAGE value="improved efficiency. &#10;moved to additional functions&#10;added progress bar to conversions" />
-    <option name="LAST_COMMIT_MESSAGE" value="improved efficiency. &#10;moved to additional functions&#10;added progress bar to conversions" />
+    <MESSAGE value="additional improves to dynamic indexing." />
+    <option name="LAST_COMMIT_MESSAGE" value="additional improves to dynamic indexing." />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -433,13 +455,13 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/Python_testing_Fuzzy.py</url>
-          <line>127</line>
-          <option name="timeStamp" value="330" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/Python_testing_Fuzzy.py</url>
           <line>163</line>
           <option name="timeStamp" value="332" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/new_util.py</url>
+          <line>148</line>
+          <option name="timeStamp" value="337" />
         </line-breakpoint>
       </breakpoints>
       <breakpoints-dialog>
@@ -452,18 +474,11 @@
           </properties>
         </breakpoint>
       </default-breakpoints>
-      <option name="time" value="333" />
+      <option name="time" value="338" />
     </breakpoint-manager>
     <watches-manager />
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://C:/Program Files (x86)/Python36-32/Lib/site-packages/xlrd/xlsx.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="182">
-          <caret line="160" column="0" lean-forward="false" selection-start-line="160" selection-start-column="0" selection-end-line="160" selection-end-column="0" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://C:/Program Files (x86)/Python36-32/Lib/site-packages/colorama/ansitowin32.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="144">
@@ -632,9 +647,7 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="85">
           <caret line="5" column="29" lean-forward="true" selection-start-line="5" selection-start-column="29" selection-end-line="5" selection-end-column="29" />
-          <folding>
-            <element signature="e#1111#1150#0" expanded="false" />
-          </folding>
+          <folding />
         </state>
       </provider>
     </entry>
@@ -642,14 +655,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="202">
           <caret line="606" column="0" lean-forward="false" selection-start-line="606" selection-start-column="0" selection-end-line="606" selection-end-column="0" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://C:/Program Files (x86)/Python36-32/Lib/site-packages/pandas/core/generic.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="202">
-          <caret line="1736" column="0" lean-forward="false" selection-start-line="1736" selection-start-column="0" selection-end-line="1736" selection-end-column="0" />
           <folding />
         </state>
       </provider>
@@ -680,21 +685,39 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/new_util.py">
+    <entry file="file://C:/Program Files (x86)/Python36-32/Lib/site-packages/pandas/core/generic.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1436">
-          <caret line="90" column="30" lean-forward="true" selection-start-line="90" selection-start-column="30" selection-end-line="90" selection-end-column="30" />
-          <folding>
-            <element signature="e#41#80#0" expanded="true" />
-          </folding>
+        <state relative-caret-position="202">
+          <caret line="1715" column="0" lean-forward="false" selection-start-line="1715" selection-start-column="0" selection-end-line="1715" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://C:/Program Files (x86)/Python36-32/Lib/site-packages/pandas/core/dtypes/cast.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="406">
+          <caret line="159" column="0" lean-forward="false" selection-start-line="159" selection-start-column="0" selection-end-line="159" selection-end-column="0" />
+          <folding />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/Python_testing_Fuzzy.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="102">
-          <caret line="6" column="27" lean-forward="true" selection-start-line="6" selection-start-column="27" selection-end-line="6" selection-end-column="27" />
-          <folding />
+        <state relative-caret-position="-1026">
+          <caret line="105" column="10" lean-forward="true" selection-start-line="105" selection-start-column="10" selection-end-line="105" selection-end-column="10" />
+          <folding>
+            <element signature="e#41#60#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/new_util.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="399">
+          <caret line="141" column="28" lean-forward="false" selection-start-line="141" selection-start-column="28" selection-end-line="141" selection-end-column="28" />
+          <folding>
+            <element signature="e#41#80#0" expanded="true" />
+          </folding>
         </state>
       </provider>
     </entry>
