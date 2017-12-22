@@ -1,4 +1,6 @@
-import Levenshtein
+#!/usr/bin/env python
+# encoding: utf-8
+
 import pandas as pd
 import timeit
 import new_util
@@ -6,98 +8,9 @@ from fuzzywuzzy import process
 from fuzzywuzzy import fuzz
 
 
-# checks unmapped code display words against keywords table
-def keyword_lookup(s1):
-    for word in s1:
-        for keyword in key_d['Keywords']:
-            if word.lower() in keyword.lower():
-                return True
-    return False
-
-
-# checks unmapped raw code system against the code systems within the best match
-def code_sys_check(s1, s2):
-    for code in s1:
-        if code.lower() in s2.lower():
-            return True
-    return False
-
-
-# yes no prompt
-def yes_or_no(question):
-    while "the answer is invalid":
-        reply = str(input(question + ' (y/n): ')).lower().strip()
-        if reply[0] == 'y':
-            return True
-        if reply[0] == 'n':
-            return False
-
-
-def get_best_match(s1, array):
-    highest_score = 0
-    best_row = ""
-    for j in array:
-        score = Levenshtein.ratio(s1, j[1])
-        if score is 1:
-            return j, score
-        elif score > highest_score:
-            best_row = j
-            highest_score = score
-    return best_row, highest_score
-
-
-def medication_check(s1, array):
-    if s1 in array:
-        return True
-    return False
-
-
-def process_and_sort(s, force_ascii, full_process=True):
-    """Return a cleaned string with token sorted."""
-    # pull tokens
-    ts = new_util.full_process(s, force_ascii=force_ascii) if full_process else s
-    tokens = ts.split()
-
-    # sort tokens and join
-    sorted_string = u" ".join(sorted(tokens))
-    return sorted_string.strip()
-
-
-@new_util.check_for_none
-def token_clean(s1, force_ascii=True, full_process=True):
-    sorted1 = process_and_sort(s1, force_ascii, full_process=full_process)
-    return sorted1
-
-
-def column_locations(preset_headers, file_name):
-    for header in range(len(preset_headers)):
-        if preset_headers[header] in list(file_name.columns.values):
-            preset_headers[header] = file_name.columns.get_loc(preset_headers[header])
-
-        else:
-            print(
-                'Could not find a column with the header %s. I will need you to enter the header representing this column within the data file.\n Your options are.. \n '
-                % exc_headers[header])
-            for j in file_name.columns.values:
-                print(j)
-
-            while True:
-                try:
-                    column_name = input(
-                        "What is the name of the header representing %s? " %
-                        exc_headers[header])
-                    if column_name not in file_name.columns.values:
-                        print(
-                            "That column name is not within the file. Please try again. Capitalization counts."
-                        )
-                    else:
-                        print("Perfect. I will use that column header instead")
-                        exc_headers[header] = file_name.columns.get_loc(column_name)
-                        break
-                except ValueError:
-                    print("Not a valid input. Try again.\n")
-                    continue
-
+def start(j):
+    if j % 50 == 0:
+        return timeit.default_timer()
 
 # headers representing data needed
 exc_headers = [
@@ -160,10 +73,10 @@ exc_d['un_cleaned_display'] = ""
 acc_d['val_cleaned_display'] = ""
 
 # get excel file column locations
-column_locations(exc_headers, exc_d)
+new_util.column_locations(exc_headers, exc_d)
 
 # get access file column locations
-column_locations(acc_headers, acc_d)
+new_util.column_locations(acc_headers, acc_d)
 
 
 # row count used to determine completion time
@@ -178,33 +91,15 @@ expected_time = (total_excel_rows * 2) / 60
 # tell user completion time.
 print(
     "Oh hai. So this might take a bit. I am checking %s unmapped codes against %s validated codes...."
-    "That is a lot of math. I expect to be done in roughly %.2f minutes" %
+    "That is a lot of maths. I expect to be done in roughly %.2f minutes" %
     (total_excel_rows, total_access_rows, expected_time))
 
 
-print("Cleaning the validated code displays....\n")
+# clean unmapped headers
+new_util.row_cleaning(exc_headers, exc_d, total_excel_rows, 8)
 
-for row in acc_d.itertuples():
-        percent_completed = (row[0] / total_access_rows) * 100
-
-        if percent_completed % 5 == 0:
-            print("%i%% complete...." % percent_completed)
-
-        acc_d.loc[row[0], ['val_cleaned_display']] = token_clean(row[acc_headers[0] + 1], force_ascii=True, full_process=True)
-
-print("Done cleaning validated code displays....")
-
-
-print("Cleaning the unmapped code displays....\n")
-for row in exc_d.itertuples():
-    percent_completed = (row[0] / total_excel_rows) * 100
-
-    if percent_completed % 5 == 0:
-        print("%i%% complete...." % percent_completed)
-
-    exc_d.loc[row[0], ['un_cleaned_display']] = token_clean(row[exc_headers[0] + 1], force_ascii=True, full_process=True)
-
-print("Done cleaning unmapped code displays....")
+# cleans access displays
+new_util.row_cleaning(acc_headers, acc_d, total_access_rows, 4)
 
 
 # Loops throw the currently unmapped raw code displays and checks it against the previously mapped displays.
@@ -217,15 +112,17 @@ for row in exc_d.itertuples():
     prec_analysis = ""
     best_map_count = 0
     best_concept_alias = ""
-    code_time = timeit.default_timer()
+
+    code_time = start(i)
+
 
     # Checks each word against the keyword table for any hits.
-    keyword_check = keyword_lookup(unmapped_code_split)
+    keyword_check = new_util.keyword_lookup(unmapped_code_split, key_d['Keywords'])
 
     # gets lev quick score
-    lev_match = get_best_match(unmapped, acc_d.itertuples())
+    lev_match = new_util.get_best_match(unmapped, acc_d.itertuples())
 
-    meds_check = medication_check(unmapped, meds_d['drug_name'])
+    meds_check = new_util.medication_check(unmapped, meds_d['drug_name'])
 
     best_score = lev_match[1]
 
@@ -249,7 +146,7 @@ for row in exc_d.itertuples():
         best_concept_alias = acc_d.iloc[match_index, acc_headers[3]]
 
     # Checks if code system is within the best match.
-    code_sys_check_result = code_sys_check(un_code_sys, acc_d.iloc[i, acc_headers[2]])
+    code_sys_check_result = new_util.code_sys_check(un_code_sys, acc_d.iloc[i, acc_headers[2]])
 
     # determines analysis result
     if best_score == 1 and code_sys_check_result:
@@ -265,9 +162,9 @@ for row in exc_d.itertuples():
 
     rows_remaining = total_excel_rows - i
 
-    if i % 4 == 0:
+    if i % 50 == 0:
         Code_elapsed = timeit.default_timer() - code_time
-        print("5 rows completed. It took %.2f sec to calculate. %i rows remaining." %
+        print("50 rows completed. It took %.2f sec to calculate. %i rows remaining." %
             (Code_elapsed, rows_remaining))
 
     # write to dataFrame
