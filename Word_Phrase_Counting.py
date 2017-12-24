@@ -1,9 +1,7 @@
 
-import sys
 import codecs
 import nltk
 import csv
-from nltk.corpus import stopwords
 
 
 # NLTK's default German stopwords
@@ -17,7 +15,8 @@ all_stopwords = default_stopwords
 # input_file = sys.argv[1]
 
 
-fp = codecs.open("C:\\Users\\ja052464\\Downloads\\All_Validated_Counts.txt", 'r', encoding='utf-8', errors='ignore')
+fp = codecs.open("C:\\Users\\ja052464\\Downloads\\All_Validated_Counts.txt",
+                 'r', encoding='utf-8', errors='ignore')
 
 
 words = nltk.word_tokenize(fp.read())
@@ -30,7 +29,6 @@ scrubbed_words = []
 for word in words:
     if len(word) > 1 and not word.isnumeric() and word not in all_stopwords:
         scrubbed_words.append(word.lower())
-
 
 
 # Calculates count of individual words
@@ -47,7 +45,7 @@ with open("final_counts.csv", "w") as fp:
     writer.writerows(fdist.items())
 
 with open("final_combinations.csv", "w") as bp:
-    writer = csv.writer(bp, quoting=csv.QUOTE_MINIMAL,lineterminator='\n')
+    writer = csv.writer(bp, quoting=csv.QUOTE_MINIMAL, lineterminator='\n')
     writer.writerows(bglist.items())
 
 print("done!:)")

@@ -2,15 +2,16 @@
 # encoding: utf-8
 
 import pandas as pd
-import new_util
-from fuzzywuzzy import process
 from fuzzywuzzy import fuzz
-from time import sleep
+from fuzzywuzzy import process
+import new_util
 import text
-
 
 # headers representing data needed
 exc_headers = [
+    'RAW_CODE_DISPLAY', 'RAW_CODE_SYSTEM_NAME', 'PRECEDENT_ANALYSIS',
+    'PRECEDENT_MATCH', 'PRECEDENT_SIMILARITY', 'PRECEDENT_MAP_COUNT', 'PRECEDENT_RAW_CODE_SYSTEM_IDs', 'PRECEDENT_CONCEPT_ALIAS', 'un_cleaned_display']
+exc_headers_names = [
     'RAW_CODE_DISPLAY', 'RAW_CODE_SYSTEM_NAME', 'PRECEDENT_ANALYSIS',
     'PRECEDENT_MATCH', 'PRECEDENT_SIMILARITY', 'PRECEDENT_MAP_COUNT', 'PRECEDENT_RAW_CODE_SYSTEM_IDs', 'PRECEDENT_CONCEPT_ALIAS', 'un_cleaned_display']
 acc_headers = [
@@ -63,7 +64,6 @@ meds_d = pd.read_csv(medication_workbook_location,
                      encoding='iso-8859-1', dtype=str).astype(str)
 
 
-# todo - Determine column index from column headers
 # loops through the headers of the unmapped codes CSV file to check for any header changes.
 # If a header is different, prompt user for the header name and use that.
 
@@ -87,29 +87,7 @@ total_key_rows = key_d['Keywords'].count()
 
 # tell user completion time.
 
-# text.print_slow(
-#     "Oh hai there. My name is BORIS. Looks like you want to run the precedent check. I can do that....\n")
-#
-# sleep(2)
-#
-# text.print_slow("Okiedokie so we have " + str(total_excel_rows) + " unmapped code displays to check. This will take me a bit... \n"
-#                 "I will need to check each and every one of these displays against" +
-#                 str(total_access_rows) + " previously mapped displays, "
-#                 + str(total_med_rows) + " medications, and " + str(total_key_rows) + "....\n" +
-#                 "Needless to say that's a lot of math!\n\n")
-#
-# sleep(4)
-#
-# text.print_slow("Anyway... let's get to it. For the most part I will handle things. You can just watch the pretty status bars below. \n"
-#                 "If I need something from you I will ask you in the text area below.\n\n")
-#
-# sleep(4)
-#
-# text.print_slow("Oh one quick thing.... Kind of important.... See the speed at which I can do math (aka finish this) is directly related to how hard your PC is working. \n"
-#                 "For the most part I will be fine, but watching a video while I am working will make this take twice as long. \n"
-#                 "So if you want me to finish as quickly as I can hold off on your cat videos and other cpu heavy stuff until I am done... Okay that was the last thing. Let's get started!\n\n")
-#
-# sleep(2)
+text.intro(total_excel_rows, total_access_rows, total_med_rows, total_key_rows)
 
 
 # clean unmapped headers
@@ -119,23 +97,23 @@ new_util.row_cleaning(exc_headers, exc_d, total_excel_rows, 8, "unmapped")
 new_util.row_cleaning(acc_headers, acc_d, total_access_rows,
                       4, "previously validated")
 
+acc_d.drop_duplicates()
 
 print("Analyzing data.... aka of math....")
 bar = new_util.progressbar.ProgressBar(maxval=total_excel_rows, widgets=[new_util.progressbar.Bar('=', '[', ']'),
                                                                          ' ', new_util.progressbar.Percentage(),
                                                                          ' ', new_util.progressbar.AdaptiveETA()])
+
 # Loops throw the currently unmapped raw code displays and checks it against the previously mapped displays.
 for row in exc_d.itertuples():
     i = row[0]
-    unmapped = exc_d.iloc[i, exc_headers[8] + 1]
-    un_code_sys = exc_d.iloc[i, exc_headers[1] + 1]
-    unmapped_code_split = exc_d.iloc[i, exc_headers[8] + 1].split()
+    unmapped = exc_d.iloc[i, exc_headers[8]]
+    un_code_sys = exc_d.iloc[i, exc_headers[1]]
+    unmapped_code_split = exc_d.iloc[i, exc_headers[8]].split()
     best_display = ""
     prec_analysis = ""
     best_map_count = 0
     best_concept_alias = ""
-
-    # code_time = timeit.default_timer()
 
     # Checks each word against the keyword table for any hits.
     keyword_check = new_util.keyword_lookup(
@@ -150,9 +128,9 @@ for row in exc_d.itertuples():
 
     # if it is a perfect match, then end loop and write results
     if best_score == 1 and keyword_check:
-        best_display = acc_d.iloc[i, acc_headers[0] + 1]
-        best_map_count = acc_d.iloc[i, acc_headers[1] + 1]
-        best_code_system = acc_d.iloc[i, acc_headers[2] + 1]
+        best_display = acc_d.iloc[i, acc_headers[0]]
+        best_map_count = acc_d.iloc[i, acc_headers[1]]
+        best_code_system = acc_d.iloc[i, acc_headers[2]]
     # if it is a close match, run fuzzy match to identify closest legit match
     elif .9 <= best_score < 1 or keyword_check and meds_check is False:
 
@@ -175,34 +153,24 @@ for row in exc_d.itertuples():
     # determines analysis result
     if best_score == 1 and code_sys_check_result:
         prec_analysis = "100% Match"
-    elif best_score >= .88 and code_sys_check_result and keyword_check:
-        prec_analysis = "Strong Match & Display Contains Keyword"
-    elif .7 >= best_score < .85 and keyword_check:
-        prec_analysis = "Possible Match. Contains Keyword"
-    elif best_score < .7 and keyword_check is False:
-        prec_analysis = "Weak Match. No Keyword"
-    elif best_score <= .7 and keyword_check is False:
-        prec_analysis = "Low Probability . No Keyword"
-
-    rows_remaining = total_excel_rows - i
-
-    # if i % 50 == 0:
-    #     Code_elapsed = timeit.default_timer() - code_time
-    #     print("50 rows completed. It took %.2f sec to calculate. %i rows remaining." %
-    #         (Code_elapsed, rows_remaining))
+    elif best_score >= .85 and keyword_check is True:
+        prec_analysis = "Possible Match with Keyword"
+    elif best_score > .85 and keyword_check is False:
+        prec_analysis = "Possible Match no Keyword"
+    else:
+        prec_analysis = "Low Match Probability"
 
     # write to dataFrame
-    exc_d.at[i, exc_headers[0]] = best_display
-    exc_d.at[i, exc_headers[4]] = best_score
-    exc_d.at[i, exc_headers[2]] = prec_analysis
-    exc_d.at[i, exc_headers[5]] = best_map_count
-    exc_d.at[i, exc_headers[6]] = best_concept_alias
+    exc_d.at[i, exc_headers_names[3]] = best_display
+    exc_d.at[i, exc_headers_names[4]] = best_score
+    exc_d.at[i, exc_headers_names[2]] = prec_analysis
+    exc_d.at[i, exc_headers_names[5]] = best_map_count
+    exc_d.at[i, exc_headers_names[6]] = best_concept_alias
 
     bar.update(i + 1),
 
 bar.update(total_excel_rows, True),
 
-# elapsed = (timeit.default_timer() - start_time) / 60
 
 print("Analysis completed. Hold tight while I write the results to file.\n....\n....")
 
