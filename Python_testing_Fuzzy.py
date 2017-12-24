@@ -97,9 +97,11 @@ new_util.row_cleaning(exc_headers, exc_d, total_excel_rows, 8, "unmapped")
 new_util.row_cleaning(acc_headers, acc_d, total_access_rows,
                       4, "previously validated")
 
+# removes duplicate rows from previously matched
 acc_d.drop_duplicates()
 
 print("Analyzing data.... aka of math....")
+
 bar = new_util.progressbar.ProgressBar(maxval=total_excel_rows, widgets=[new_util.progressbar.Bar('=', '[', ']'),
                                                                          ' ', new_util.progressbar.Percentage(),
                                                                          ' ', new_util.progressbar.AdaptiveETA()])
