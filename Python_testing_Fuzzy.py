@@ -129,6 +129,7 @@ for row in exc_d.itertuples():
 
     best_score = lev_match[1]
 
+    # TODO - Add rule to exclude loop if medication check is true.
     # if it is a perfect match, then end loop and write results
     if best_score == 1 and keyword_check:
         best_display = acc_d.iloc[i, acc_headers[0]]
@@ -143,7 +144,7 @@ for row in exc_d.itertuples():
 
         # store results
         match_index = results[2]
-        best_score = results[1]
+        best_score = (results[1] / 100)
         best_display = acc_d.iloc[match_index, acc_headers[0]]
         best_map_count = acc_d.iloc[match_index, acc_headers[1]]
         best_code_system = acc_d.iloc[match_index, acc_headers[2]]
