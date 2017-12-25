@@ -6,6 +6,7 @@ from fuzzywuzzy import fuzz
 from fuzzywuzzy import process
 import new_util
 import text
+import numpy as np
 
 # headers representing data needed
 exc_headers = [
@@ -29,7 +30,7 @@ acc_headers = [
 
 # file paths
 excel_workbook_location = (
-    "C:\\Users\\ja052464\\OneDrive - Cerner Corporation\\Documents\\NMHS_NE Phase 1 Unmapped Coes To Review.csv")
+    "C:\\Users\\ja052464\\OneDrive - Cerner Corporation\\Documents\\NMHS_NE Phase 1 Unmapped Coes To Review2.csv")
 access_workbook_location = (
     "C:\\Users\\ja052464\\OneDrive - Cerner Corporation\\Documents\\Q_Validated_To_Concept_No_Medications.csv")
 keywords_workbook_location = (
@@ -87,7 +88,7 @@ total_key_rows = key_d['Keywords'].count()
 
 # tell user completion time.
 
-text.intro(total_excel_rows, total_access_rows, total_med_rows, total_key_rows)
+# text.intro(total_excel_rows, total_access_rows, total_med_rows, total_key_rows)
 
 
 # clean unmapped headers
@@ -176,6 +177,9 @@ bar.update(total_excel_rows, True),
 
 print("Analysis completed. Hold tight while I write the results to file.\n....\n....")
 
-exc_d.to_csv(path + "testing_export.csv")
+# replace the nan values with empty strings.
+exc_d = exc_d.replace('nan', '')
+
+exc_d.to_csv(path + "testing_export_no_na.csv")
 
 print("All done!")

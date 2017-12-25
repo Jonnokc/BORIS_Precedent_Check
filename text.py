@@ -12,6 +12,7 @@ def print_slow(text):
         sys.stdout.write(letter)
         sys.stdout.flush()
 
+
 def intro(total_excel_rows, total_access_rows, total_med_rows, total_key_rows):
     print_slow(
         "Oh hai there. My name is BORIS. Looks like you want to run the precedent check. I can do that....\n")
@@ -26,7 +27,7 @@ def intro(total_excel_rows, total_access_rows, total_med_rows, total_key_rows):
 
     sleep(4)
 
-    print_slow("Anyway... let's get to it. For the most part I will handle things. You can just watch the pretty status bars below. \n""
+    print_slow("Anyway... let's get to it. For the most part I will handle things. You can just watch the pretty status bars below. \n"
                "If I need something from you I will ask you in the text area below.\n\n")
 
     sleep(4)
