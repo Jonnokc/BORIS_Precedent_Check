@@ -199,7 +199,7 @@ For i = 1 To UBound(Final_All_Unmapped_Displays_To_Check)
   Code_System_Check_Answer = False
 
   DoEvents
-  Application.StatusBar = "Current progress: " & (1 / UBound(Final_All_Unmapped_Displays_To_Check) * 100) & "% complete"
+  Application.StatusBar = "Current progress: " & (i / UBound(Final_All_Unmapped_Displays_To_Check) * 100) & "% complete"
 
 
     ' Checks the currently unmapped against all previously unmapped
