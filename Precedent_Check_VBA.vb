@@ -27,15 +27,17 @@ Dim Final_All_Match_Responses As Variant
 Dim Final_All_Similarities As Variant
 Dim Final_All_Precedent_Map_Count As Variant
 Dim Scrubbed_Previously_Mapped_Displays As Variant
+Dim Medication_Headers As Variant
 
 Application.ScreenUpdating = False
 
 
 
-Sheet_Names = Array("To_Review", "Previously_Mapped")
+Sheet_Names = Array("To_Review", "Previously_Mapped", "Medications")
 To_Review_Headers = Array("RAW_CODE_DISPLAY", "RAW_CODE_SYSTEM_NAME", "RAW_CODE_SYSTEM_ID", "DATA_MODEL", "Precdent Closest Match", "Precedent Raw Code System ID(s)", "Precdent Concept Alias", "MATCH_RESPONSE", "Precident Map Count", "Similarity")
 Previously_Mapped_Headers = Array("Raw Code Display", "Map Count", "Precedent Data Model(s)", "Precedent Raw Code System ID(s)", "Concept Alias")
 New_Headers = Array("Closest Match", "Precedent Data Model(s)", "Precedent Raw Code System ID(s)", "Precdent Concept Alias", "Similarity")
+Medication_Headers = Array("drug_name")
 
 
 ' Checks the 'To_Review sheet to confirm the headers are all there.
@@ -165,8 +167,13 @@ Sheets(Sheet_Names(1)).Range(Previously_Mapped_Headers(4) & "2:" & Previously_Ma
 'Saves range to array
 All_Prev_Mapped_Concept_Aliases = Range("Previously_Mapped_Concept_Alias").Value
 
-' holding the scrubbed previously mapped displays
-Scrubbed_Previously_Mapped_Displays = Range("Previously_Mapped_Displays").Value
+
+' Names the Medication displays as a Range
+Sheets(Sheet_Names(2)).Range("A" & "2:" & "A" & Sheets(Sheet_Names(2)).Cells.SpecialCells(xlCellTypeLastCell).row).Name = "All_Medication_Displays"
+' Saves range to array
+All_Prev_Medication_Displays = Range("All_Medication_Displays")
+
+
 
 Sheets(Sheet_Names(0)).Select
 
@@ -177,75 +184,63 @@ For i = 1 To UBound(All_Prev_Mapped_Displays)
   All_Prev_Mapped_Displays(i, 1) = Utils.Cleaning(All_Prev_Mapped_Displays(i, 1))
 Next i
 
+' TODO - Loop through Previously mapped and currently mapped and sort words in string alphabetically
+
+
 ' SUB - ACTUAL LOGIC TO FIND MATCHES
 ''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 
 For i = 1 To UBound(Final_All_Unmapped_Displays_To_Check)
 
-    ' Cell value currently looking for a closest match with
-    Unmapped_Display_Checking = Final_All_Unmapped_Displays_To_Check(i, 1)
-    Unmapped_Code_System_To_Check = Final_All_Code_Systems_To_Check(i, 1)
-    Best_Similarity = 0
-    Code_System_Check_Answer = False
+  ' Cell value currently looking for a closest match with
+  Unmapped_Display_Checking = Final_All_Unmapped_Displays_To_Check(i, 1)
+  Unmapped_Code_System_To_Check = Final_All_Code_Systems_To_Check(i, 1)
+  Best_Similarity = 0
+  Code_System_Check_Answer = False
 
-      DoEvents
-      Application.StatusBar = "Current progress: " & (1 / UBound(Final_All_Unmapped_Displays_To_Check) * 100) & "% complete"
+  DoEvents
+  Application.StatusBar = "Current progress: " & (1 / UBound(Final_All_Unmapped_Displays_To_Check) * 100) & "% complete"
 
-    testing = Utils.IsInArray(Unmapped_Display_Checking, All_Prev_Mapped_Displays)
-
-testing_clean = Application.WorksheetFunction.Clean(Trim(LCase(Unmapped_Display_Checking)))
-
-checking = Utils.Cleaning(Unmapped_Display_Checking)
 
     ' Checks the currently unmapped against all previously unmapped
-    For j = 1 To UBound(All_Prev_Mapped_Displays)
-      Prev_Mapped_Checking = All_Prev_Mapped_Displays(j, 1)
+  For j = 1 To UBound(All_Prev_Mapped_Displays)
+    Prev_Mapped_Checking = All_Prev_Mapped_Displays(j, 1)
 
-      Fuzzy_Similarity = Functions.HotFuzz(Unmapped_Display_Checking, Prev_Mapped_Checking)
-      ' Checks the code system and awards a bonus for a match
-      Code_System_Check = InStr(Unmapped_Code_System_To_Check, Prev_Mapped_Code_Systems)
+    ' Medication Checks
+    Medication_Check = Utils.IsInArray(Prev_Mapped_Checking, All_Prev_Medication_Displays)
 
-      If Code_System_Check > 0 Then
-        Code_System_Check_Answer = True
-      End If
+    Fuzzy_Similarity = Functions.HotFuzz(Unmapped_Display_Checking, Prev_Mapped_Checking)
+    ' Checks the code system and awards a bonus for a match
 
-      Combined_Similarity = Fuzzy_Similarity
 
-      If Combined_Similarity = 1 And Code_System_Check_Answer = True Then
-        Best_Match_Code_System_Answer = Code_System_Check_Answer
-        Best_Similarity = Combined_Similarity
-        Prev_Best_Match_Display = All_Prev_Mapped_Displays(j, 1)
-        Prev_Mapped_Map_Count = All_Prev_Mapped_Map_Count(j, 1)
-        Prev_Mapped_Code_Systems = All_Prev_Mapped_Code_Systems(j, 1)
-        Prev_Mapped_Data_Models = All_Prev_Mapped_Data_Models(j, 1)
-        Prev_Mapped_Concept_Alias = All_Prev_Mapped_Concept_Aliases(j, 1)
+    If Fuzzy_Similarity = 1 Then
+      best_match_index = j
+      Best_Similarity = Fuzzy_Similaritya
       Exit For
 
-      ElseIf Combined_Similarity > Best_Similarity Then
-        ' Saves the values of the current best match
-        Best_Match_Code_System_Answer = Code_System_Check_Answer
-        Best_Similarity = Combined_Similarity
-        Prev_Best_Match_Display = All_Prev_Mapped_Displays(j, 1)
-        Prev_Mapped_Map_Count = All_Prev_Mapped_Map_Count(j, 1)
-        Prev_Mapped_Code_Systems = All_Prev_Mapped_Code_Systems(j, 1)
-        Prev_Mapped_Data_Models = All_Prev_Mapped_Data_Models(j, 1)
-        Prev_Mapped_Concept_Alias = All_Prev_Mapped_Concept_Aliases(j, 1)
-      End If
-    Next j
-
-    If Best_Similarity > 0.5 Then
-      Final_All_Precedent_Closest_Match_Results(i, 1) = Prev_Best_Match_Display
-      Final_Precedent_Code_System_IDs(i, 1) = Prev_Mapped_Code_Systems
-      Final_Precedent_Concept_Aliases(i, 1) = Prev_Mapped_Concept_Alias
-      Final_All_Precedent_Map_Count(i, 1) = Prev_Mapped_Map_Count
-      Final_All_Similarities(i, 1) = Best_Similarity
-      If Code_System_Check_Answer = False Then
-        Final_All_Match_Responses(i, 1) = "Code System of Closest Match IS NOT Within Previously Validated"
-      ElseIf Code_System_Check_Answer = True Then
-        Final_All_Match_Responses(i, 1) = "Code System of Closest Match IS Within Previously Validated"
-      End If
+    ElseIf Best_Similarity > Fuzzy_Similarity Then
+      ' Saves the values of the current best match
+      best_match_index = j
+      Best_Similarity = Fuzzy_Similarity
     End If
-  Next i
+  Next j
+
+  If Best_Similarity > 0.5 Then
+    ' Checks if code system is within best match
+    Code_System_Check_Answer = Code_System_Check(Unmapped_Code_System_To_Check, All_Prev_Mapped_Code_Systems(best_match_index, 1))
+
+    Final_All_Precedent_Closest_Match_Results(i, 1) = All_Prev_Mapped_Displays(best_match_index, 1)
+    Final_Precedent_Code_System_IDs(i, 1) = All_Prev_Mapped_Code_Systems(best_match_index, 1)
+    Final_Precedent_Concept_Aliases(i, 1) = All_Prev_Mapped_Concept_Aliases(best_match_index, 1)
+    Final_All_Precedent_Map_Count(i, 1) = All_Prev_Mapped_Map_Count(best_match_index, 1)
+    Final_All_Similarities(i, 1) = Best_Similarity
+    If Code_System_Check_Answer = False Then
+      Final_All_Match_Responses(i, 1) = "Code System of Closest Match IS NOT Within Previously Validated"
+    ElseIf Code_System_Check_Answer = True Then
+      Final_All_Match_Responses(i, 1) = "Code System of Closest Match IS Within Previously Validated"
+    End If
+  End If
+Next i
 
 User_Exit:
 
