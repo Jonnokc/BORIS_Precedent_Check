@@ -3,8 +3,18 @@ Function HotFuzz(ByVal S1 As String, ByVal S2 As String, Optional ByVal N As Boo
 'Use x & Chr(34) if you need to allow double quotes (") in the input strings
 'Allowing numbers in the input strings is optional (the 'n' parameter)
 'The 'w' parameter is the weight of "order" over "frequency" scores in the final score. Feel free to experiment, to get best matching results with your data.
-  Dim i As Integer, d1 As Integer, d2 As Integer, y As String, b As Boolean
-  Dim c As String, a1 As String, a2 As String, k As Integer, p As Integer, f As Single, o As Single
+  Dim i As Integer
+  Dim d1 As Integer
+  Dim d2 As Integer
+  Dim y As String
+  Dim b As Boolean
+  Dim c As String
+  Dim a1 As String
+  Dim a2 As String
+  Dim k As Integer
+  Dim p As Integer
+  Dim f As Single
+  Dim o As Single
   '
   '        ******* INPUT STRINGS CLEANSING *******
   '
@@ -101,84 +111,5 @@ Function HotFuzz(ByVal S1 As String, ByVal S2 As String, Optional ByVal N As Boo
     Loop
     If o > 0 Then o = o + 1                      'if we got at least one match, adjust the order counter because two characters are required to define "order"
     HotFuzz = (w * o + f) / (w + 1) / d2
-  End If
-End Function
-
-
-Function JW(ByVal str1 As String, ByVal str2 As String) As Double
-  Dim L1, L2, lmin, lmax, M, i, j As Integer
-  Dim common As Integer
-  Dim tr As Double
-  Dim a1, a2 As String
-  L1 = Len(str1)
-  L2 = Len(str2)
-  If L1 > L2 Then
-    aux = L2
-    L2 = L1
-    L1 = aux
-    auxstr = str1
-    str1 = str2
-    str2 = auxstr
-  End If
-  lmin = L1
-  lmax = L2
-  Dim f1(), f2() As Boolean
-  ReDim f1(L1), f2(L2)
-  For i = 1 To L1
-    f1(i) = False
-  Next i
-  For j = 1 To L2
-    f2(j) = False
-  Next j
-  M = Int((lmax / 2) - 1)
-  common = 0
-  tr = 0
-  For i = 1 To L1
-    a1 = Mid(str1, i, 1)
-    If M >= i Then
-      f = 1
-      L = i + M
-    Else
-      f = i - M
-      L = i + M
-    End If
-    If L > lmax Then
-      L = lmax
-    End If
-    For j = f To L
-      a2 = Mid(str2, j, 1)
-      If (a2 = a1) And (f2(j) = False) Then
-        common = common + 1
-        f1(i) = True
-        f2(j) = True
-        GoTo linea_exit
-      End If
-    Next j
-linea_exit:
-  Next i
-  Dim wcd, wrd, wtr As Double
-  L = 1
-  For i = 1 To L1
-    If f1(i) Then
-      For j = L To L2
-        If f2(j) Then
-          L = j + 1
-          a1 = Mid(str1, i, 1)
-          a2 = Mid(str2, j, 1)
-          If a1 <> a2 Then
-            tr = tr + 0.5
-          End If
-          Exit For
-        End If
-      Next j
-    End If
-  Next i
-  wcd = 1 / 3
-  wrd = 1 / 3
-  wtr = 1 / 3
-  If common <> 0 Then
-    JW = wcd * common / L1 + wrd * common / L2 + wtr * (common - tr) / common
-  Else
-    JW = 0
   End If
 End Function
