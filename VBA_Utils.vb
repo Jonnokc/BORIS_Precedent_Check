@@ -19,7 +19,7 @@ Function Medication_Checker(valToBeFound As Variant, arr As Variant, code_system
   Dim display As Variant
   On Error GoTo IsInArrayError:
   For Each display In arr
-    If LCase(display) Like "*" & LCase(valToBeFound) & "*" Then
+    If LCase(display) = LCase(valToBeFound) Then
       If LCase(code_system) Like "*medication*" Or _
       LCase(code_system) Like "*drug*" Or _
       LCase(code_system) Like "*allergy*" Then
@@ -101,18 +101,23 @@ Function Keyword_Checker(text As Variant, arr As Variant) As Variant
   Keyword_Checker = False
 End Function
 
+' Returns analysis of match
 Function Analysis(Similarity As Variant, Keyword_Check As Variant, Code_System_Check_Answer As Variant, Medication_Check As Variant)
-  If Similarity = 1 And Code_System_Check_Answer = True Then
+  If Similarity = 1 And Medication_Check = "Medication" Then
+    Analysis = "Medication"
+  ElseIf Similarity = 1 And Medication_Check = "Wrong Code System" Then
+    Analysis = "Medication display with wrong code System. Exclude"
+  ElseIf Similarity = 1 And Code_System_Check_Answer = True Then
     Analysis = "Perfect Match"
   ElseIf Similarity >= 0.9 And Keyword_Check = True Then
-    Analysis = "Strong Match, Keyword"
-  ElseIf Similarity = 1 And Medication_Check = "Medication" Then
-    Analysis = "Medication"
-  ElseIf Similarity = 1 And Medication_Check = "Wrong Code System" then
-    Analysis = "Medication display with wrong code System. Exclude"
-  ElseIf Similarity >= 0.7 And Keyword_Check = True Then
-    Analysis = "Possible Match, Keyword"
+    Analysis = "Strong Match, Includes Keyword"
+  ElseIf Similarity >= 0.9 And Keyword_Check = False Then
+    Analysis = "Strong Possible Match, No Keyword"
+  ElseIf Similarity >= 0.85 And Keyword_Check = True Then
+    Analysis = "Possible Match, Includes Keyword"
+  ElseIf Keyword_Check = True Then
+    Analysis = "Weak Match, Includes Keyword"
   Else
-    Analysis = "Weak Match"
+    Analysis = "Very Weak Match"
   End If
 End Function

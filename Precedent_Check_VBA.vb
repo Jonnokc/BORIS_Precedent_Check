@@ -239,7 +239,6 @@ Sub Precedence_Check()
   ' Keyword Checker. Checks each word of display against keyword table.
     Keyword_Check = Utils.Keyword_Checker(Unmapped_Display_Checking, All_Prev_Keywords_Displays)
 
-
   ' If display display is not on the medication list or IS with the correct code system
     If Medication_Check = False Or Medication_Check = "Medication" Then
     ' Checks the currently unmapped against all previously unmapped
@@ -261,40 +260,36 @@ Sub Precedence_Check()
         End If
       Next j
 
-' TODO - FIX Analysis output
-      If Best_Similarity > 0.5 Or Keyword_Check = True Then
       ' Checks if code system is within best match
+      If Best_Similarity > 0 Then
         Code_System_Check_Answer = Code_System_Check(Unmapped_Code_System_To_Check, All_Prev_Mapped_Code_Systems(best_match_index, 1))
-
+        ' determines the response based on analysis
         Final_All_Match_Responses(i, 1) = Analysis(Best_Similarity, Keyword_Check, Code_System_Check_Answer, Medication_Check)
-
+        ' populates fields with array based on best matches
         Final_All_Precedent_Closest_Match_Results(i, 1) = All_Prev_Mapped_Displays(best_match_index, 1)
         Final_Precedent_Code_System_IDs(i, 1) = All_Prev_Mapped_Code_Systems(best_match_index, 1)
         Final_Precedent_Concept_Aliases(i, 1) = All_Prev_Mapped_Concept_Aliases(best_match_index, 1)
         Final_All_Precedent_Map_Count(i, 1) = All_Prev_Mapped_Map_Count(best_match_index, 1)
         Final_All_Similarities(i, 1) = Best_Similarity
       Else
-        Final_All_Match_Responses(i, 1) = "Very Low Probability"
+        Final_All_Match_Responses(i, 1) = "No Match Found"
       End If
 
-    End If
+      If i = UBound(Final_All_Unmapped_Displays_To_Check) Then
+        Unload ufProgress
+      End If
 
-    If i = UBound(Final_All_Unmapped_Displays_To_Check) Then
-      Unload ufProgress
-    End If
-
-  Next i
+    Next i
 
 User_Exit:
 
-' Writes the results back to the table.
+  ' Writes the results back to the table.
   Range("All_Precedent_Closest_Match_Results").Value = Final_All_Precedent_Closest_Match_Results
   Range("Precedent_Code_System_Matches").Value = Final_Precedent_Code_System_IDs
   Range("Precedent_Concept_Alias_Matches").Value = Final_Precedent_Concept_Aliases
   Range("All_Precedent_Map_Count").Value = Final_All_Precedent_Map_Count
   Range("Match_Response").Value = Final_All_Match_Responses
   Range("All_Similarities").Value = Final_All_Similarities
-
 
   Application.StatusBar = False
   Application.ScreenUpdating = True
