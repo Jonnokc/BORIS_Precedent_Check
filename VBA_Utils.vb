@@ -43,7 +43,12 @@ End Function
 
   ' Checks code system to see if code system is within best matches
 Function Code_System_Check(unmapped_code_sys As Variant, Prev_Code_Sys As Variant) As Boolean
-  Code_System_Check = InStr(Unmapped_Code_System_To_Check, Prev_Mapped_Code_Systems)
+  If InStr(unmapped_code_sys, ":") > 0 Then
+    To_Check = Mid(unmapped_code_sys, InStr(unmapped_code_sys, ":") + 1, 200)
+  Else
+    To_Check = unmapped_code_sys
+  End If
+  Code_System_Check = InStr(LCase(Prev_Code_Sys), LCase(To_Check))
 End Function
 
 ' Sorts all words in string alphabetically
@@ -95,6 +100,7 @@ Function Keyword_Checker(text As Variant, arr As Variant) As Variant
     For j = 1 To UBound(arr)
       If SubStrings(i) = arr(j, 1) Then
         Keyword_Checker = True
+        Exit Function
       End If
     Next j
   Next i
@@ -106,7 +112,7 @@ Function Analysis(Similarity As Variant, Keyword_Check As Variant, Code_System_C
   If Similarity = 1 And Medication_Check = "Medication" Then
     Analysis = "Medication"
   ElseIf Similarity = 1 And Medication_Check = "Wrong Code System" Then
-    Analysis = "Medication display with wrong code System. Exclude"
+    Analysis = "Medication. wrong code System. Exclude"
   ElseIf Similarity = 1 And Code_System_Check_Answer = True Then
     Analysis = "Perfect Match"
   ElseIf Similarity >= 0.9 And Keyword_Check = True Then
