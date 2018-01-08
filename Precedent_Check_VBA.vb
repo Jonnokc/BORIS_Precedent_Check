@@ -29,6 +29,7 @@ Sub Precedence_Check()
   Dim Scrubbed_Previously_Mapped_Displays As Variant
   Dim Medication_Headers As Variant
   Dim Keywords_Headers As Variant
+  Dim Valid_Code_Sys_Headers As Variant
   Dim lastRow As Long
   Dim pcstdone As Single
 
@@ -36,12 +37,13 @@ Sub Precedence_Check()
   Application.ScreenUpdating = False
 
 
-  Sheet_Names = Array("To_Review", "Previously_Mapped", "Medications", "Keywords")
+  Sheet_Names = Array("To_Review", "Previously_Mapped", "Medications", "Keywords", "Valid_Code_Systems")
   To_Review_Headers = Array("RAW_CODE_DISPLAY", "RAW_CODE_SYSTEM_NAME", "RAW_CODE_SYSTEM_ID", "DATA_MODEL", "Precdent Closest Match", "Precedent Raw Code System ID(s)", "Precdent Concept Alias", "MATCH_RESPONSE", "Precident Map Count", "Similarity")
   Previously_Mapped_Headers = Array("Raw Code Display", "Map Count", "Precedent Data Model(s)", "Precedent Raw Code System ID(s)", "Concept Alias")
   New_Headers = Array("Closest Match", "Precedent Data Model(s)", "Precedent Raw Code System ID(s)", "Precdent Concept Alias", "Similarity")
   Medication_Headers = Array("drug_name")
   Keywords_Headers = Array("Keywords")
+  Valid_Code_Sys_Headers = Array("Code_Systems")
 
 
 ' Checks the 'To_Review sheet to confirm the headers are all there.
@@ -187,43 +189,30 @@ Sub Precedence_Check()
 ' Saves range to array
   All_Prev_Keywords_Displays = Range("All_Keywords_Displays")
 
+  ' Names the valid code systems as a range
+    Sheets(Sheet_Names(4)).Range("A" & "2:" & "A" & Sheets(Sheet_Names(4)).Cells.SpecialCells(xlCellTypeLastCell).row).Name = "All_Valid_Code_Systems"
+  ' Saves range to array
+    All_Valid_Code_Systems = Range("All_Valid_Code_Systems")
+
 
   Sheets(Sheet_Names(0)).Select
 
 ' SUB - SCRUBS PREVIOUSLY MAPPED DISPLAYS TO STANDARDIZE FORMAT
-''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
-
-  ufProgress.LabelProgress.Width = 0
-  For i = 1 To UBound(Scrubbed_All_Prev_Mapped_Displays)
-  ' forces progress bar to screen
-    ufProgress.Show
-    pcstdone = i / UBound(Scrubbed_All_Prev_Mapped_Displays)
-  ' cleans format, removes special characters, orders string alphabetically
-    Scrubbed_All_Prev_Mapped_Displays(i, 1) = Utils.Sort_Sub_Strings(Utils.Cleaning(Utils.ReplaceSplChars(Scrubbed_All_Prev_Mapped_Displays(i, 1))))
-  ' updates progress bar
-    With ufProgress
-      .LabelCaption = "Processing Row " & i & " of " & UBound(Scrubbed_All_Prev_Mapped_Displays)
-      .LabelProgress.Width = pcstdone * (.FrameProgress.Width)
-    End With
-    DoEvents
-  ' closes progress bar when done
-    If i = UBound(Scrubbed_All_Prev_Mapped_Displays) Then
-      Unload ufProgress
-    End If
-  Next i
+'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 
 
 ' SUB - ACTUAL LOGIC TO FIND MATCHES
 ''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 
   ufProgress.LabelProgress.Width = 0
+  ufProgress.LabelProgress.BackColor = &H80FF&
+  ufProgress.Show
   For i = 1 To UBound(Final_All_Unmapped_Displays_To_Check)
 
-    ufProgress.Show
     pcstdone = i / UBound(Final_All_Unmapped_Displays_To_Check)
 
     With ufProgress
-      .LabelCaption = "Processing Row " & i & " of " & UBound(Final_All_Unmapped_Displays_To_Check)
+      .LabelCaption = "You see me I be work, work, work, work, work.... " & i & " of " & UBound(Final_All_Unmapped_Displays_To_Check)
       .LabelProgress.Width = pcstdone * (.FrameProgress.Width)
     End With
     DoEvents
@@ -233,20 +222,24 @@ Sub Precedence_Check()
     Unmapped_Code_System_To_Check = Final_All_Code_Systems_To_Check(i, 1)
     Best_Similarity = 0
 
+  ' Checks the code system of the current code to make sure it is a code system that PCST maps.
+    Legit_Code_Sys_Check = Utils.Valid_Code_Sys_Checker(Unmapped_Code_System_To_Check, All_Valid_Code_Systems)
+
   ' Medication Checker. Looks to see if code is a legit medication, or not a medication at all.
     Medication_Check = Utils.Medication_Checker(Unmapped_Display_Checking, All_Prev_Medication_Displays, Unmapped_Code_System_To_Check)
 
   ' Keyword Checker. Checks each word of display against keyword table.
     Keyword_Check = Utils.Keyword_Checker(Unmapped_Display_Checking, All_Prev_Keywords_Displays)
 
-  ' If display display is not on the medication list or IS with the correct code system
-    If Medication_Check = False Or Medication_Check = "Medication" Then
+    ' If display display is not on the medication list or IS with the correct code system
+    If (Medication_Check = False Or Medication_Check = "Medication") And Legit_Code_Sys_Check = True Then
+
     ' Checks the currently unmapped against all previously unmapped
       For j = 1 To UBound(Scrubbed_All_Prev_Mapped_Displays)
+
         Prev_Mapped_Checking = Scrubbed_All_Prev_Mapped_Displays(j, 1)
 
         Fuzzy_Similarity = Functions.HotFuzz(Unmapped_Display_Checking, Prev_Mapped_Checking)
-      ' Checks the code system and awards a bonus for a match
 
         If Fuzzy_Similarity = 1 Then
           best_match_index = j
@@ -259,27 +252,48 @@ Sub Precedence_Check()
           Best_Similarity = Fuzzy_Similarity
         End If
       Next j
+    End If
 
+
+    ' SUB Determines best values and saves to Array
+    ''''''''''''''''''''''''''''''''''''''''''''''''
+
+    If Best_Similarity > 0.7 Or Keyword_Check = True Then
       ' Checks if code system is within best match
-      If Best_Similarity > 0 Then
-        Code_System_Check_Answer = Code_System_Check(Unmapped_Code_System_To_Check, All_Prev_Mapped_Code_Systems(best_match_index, 1))
-        ' determines the response based on analysis
-        Final_All_Match_Responses(i, 1) = Analysis(Best_Similarity, Keyword_Check, Code_System_Check_Answer, Medication_Check)
-        ' populates fields with array based on best matches
-        Final_All_Precedent_Closest_Match_Results(i, 1) = All_Prev_Mapped_Displays(best_match_index, 1)
-        Final_Precedent_Code_System_IDs(i, 1) = All_Prev_Mapped_Code_Systems(best_match_index, 1)
-        Final_Precedent_Concept_Aliases(i, 1) = All_Prev_Mapped_Concept_Aliases(best_match_index, 1)
-        Final_All_Precedent_Map_Count(i, 1) = All_Prev_Mapped_Map_Count(best_match_index, 1)
-        Final_All_Similarities(i, 1) = Best_Similarity
-      Else
-        Final_All_Match_Responses(i, 1) = "No Match Found"
-      End If
+      Code_System_Check_Answer = Code_System_Check(Unmapped_Code_System_To_Check, All_Prev_Mapped_Code_Systems(best_match_index, 1))
+      ' determines the response based on analysis
+      Final_All_Match_Responses(i, 1) = Analysis(Best_Similarity, Keyword_Check, Code_System_Check_Answer, Medication_Check)
+      ' populates fields with array based on best matches
+      Final_All_Precedent_Closest_Match_Results(i, 1) = All_Prev_Mapped_Displays(best_match_index, 1)
+      Final_Precedent_Code_System_IDs(i, 1) = All_Prev_Mapped_Code_Systems(best_match_index, 1)
+      Final_Precedent_Concept_Aliases(i, 1) = All_Prev_Mapped_Concept_Aliases(best_match_index, 1)
+      Final_All_Precedent_Map_Count(i, 1) = All_Prev_Mapped_Map_Count(best_match_index, 1)
+      Final_All_Similarities(i, 1) = Best_Similarity
 
-      If i = UBound(Final_All_Unmapped_Displays_To_Check) Then
-        Unload ufProgress
-      End If
+    ' Not a valid code system. Nothing to write.
+    ElseIf Legit_Code_Sys_Check = False Then
+      Final_All_Match_Responses(i, 1) = "Bad Code System. PCST Does Not Map"
+      Final_All_Precedent_Closest_Match_Results(i, 1) = ""
+      Final_Precedent_Code_System_IDs(i, 1) = ""
+      Final_Precedent_Concept_Aliases(i, 1) = ""
+      Final_All_Precedent_Map_Count(i, 1) = ""
+      Final_All_Similarities(i, 1) = ""
 
-    Next i
+    ' No match and does not contain a keyword
+    Else
+      Final_All_Match_Responses(i, 1) = "No Match Found"
+      Final_All_Precedent_Closest_Match_Results(i, 1) = ""
+      Final_Precedent_Code_System_IDs(i, 1) = ""
+      Final_Precedent_Concept_Aliases(i, 1) = ""
+      Final_All_Precedent_Map_Count(i, 1) = ""
+      Final_All_Similarities(i, 1) = ""
+    End If
+
+    If i = UBound(Final_All_Unmapped_Displays_To_Check) Then
+      Unload ufProgress
+    End If
+
+  Next i
 
 User_Exit:
 
