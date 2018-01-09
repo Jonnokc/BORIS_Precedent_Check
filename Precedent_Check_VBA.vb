@@ -30,7 +30,7 @@ Sub Precedence_Check()
   Dim Medication_Headers As Variant
   Dim Keywords_Headers As Variant
   Dim Valid_Code_Sys_Headers As Variant
-  Dim lastRow As Long
+  Dim LastRow As Long
   Dim pcstdone As Single
 
 
@@ -39,11 +39,17 @@ Sub Precedence_Check()
 
   Sheet_Names = Array("To_Review", "Previously_Mapped", "Medications", "Keywords", "Valid_Code_Systems")
   To_Review_Headers = Array("RAW_CODE_DISPLAY", "RAW_CODE_SYSTEM_NAME", "RAW_CODE_SYSTEM_ID", "DATA_MODEL", "Precdent Closest Match", "Precedent Raw Code System ID(s)", "Precdent Concept Alias", "MATCH_RESPONSE", "Precident Map Count", "Similarity")
-  Previously_Mapped_Headers = Array("Raw Code Display", "Map Count", "Precedent Data Model(s)", "Precedent Raw Code System ID(s)", "Concept Alias")
-  New_Headers = Array("Closest Match", "Precedent Data Model(s)", "Precedent Raw Code System ID(s)", "Precdent Concept Alias", "Similarity")
+  Previously_Mapped_Headers = Array("Raw Code Display", "Map Count", "Precedent Raw Code System ID(s)", "Concept Alias")
+  New_Headers = Array("Closest Match", "Precedent Raw Code System ID(s)", "Precdent Concept Alias", "Similarity")
   Medication_Headers = Array("drug_name")
   Keywords_Headers = Array("Keywords")
   Valid_Code_Sys_Headers = Array("Code_Systems")
+
+
+  ' SUB - IMPORTS DATA FROM DATABASE
+  '''''''''''''''''''''''''''''''''''''''''
+  Call Get_Data.Data_Import
+
 
 
 ' Checks the 'To_Review sheet to confirm the headers are all there.
@@ -112,7 +118,7 @@ Sub Precedence_Check()
 ' SUB - Saves all the data to Memory
 ''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 
-' Names the currently unmapped proprietary code displays as a range
+  ' Names the currently unmapped proprietary code displays as a range
   Sheets(Sheet_Names(0)).Range(To_Review_Headers(0) & "2:" & To_Review_Headers(0) & Sheets(Sheet_Names(0)).Cells.SpecialCells(xlCellTypeLastCell).row).Name = "All_Unmapped_Displays_To_Check"
 'Saves range to array
   Final_All_Unmapped_Displays_To_Check = Range("All_Unmapped_Displays_To_Check").Value
@@ -175,7 +181,7 @@ Sub Precedence_Check()
   All_Prev_Mapped_Code_Systems = Range("Previously_Mapped_Code_Systems").Value
 
 ' Names the previously mapped concept aliases as a range
-  Sheets(Sheet_Names(1)).Range(Previously_Mapped_Headers(4) & "2:" & Previously_Mapped_Headers(4) & Sheets(Sheet_Names(1)).Cells.SpecialCells(xlCellTypeLastCell).row).Name = "Previously_Mapped_Concept_Alias"
+  Sheets(Sheet_Names(1)).Range(Previously_Mapped_Headers(3) & "2:" & Previously_Mapped_Headers(3) & Sheets(Sheet_Names(1)).Cells.SpecialCells(xlCellTypeLastCell).row).Name = "Previously_Mapped_Concept_Alias"
 'Saves range to array
   All_Prev_Mapped_Concept_Aliases = Range("Previously_Mapped_Concept_Alias").Value
 
@@ -189,26 +195,43 @@ Sub Precedence_Check()
 ' Saves range to array
   All_Prev_Keywords_Displays = Range("All_Keywords_Displays")
 
-  ' Names the valid code systems as a range
-    Sheets(Sheet_Names(4)).Range("A" & "2:" & "A" & Sheets(Sheet_Names(4)).Cells.SpecialCells(xlCellTypeLastCell).row).Name = "All_Valid_Code_Systems"
-  ' Saves range to array
-    All_Valid_Code_Systems = Range("All_Valid_Code_Systems")
+' Names the valid code systems as a range
+  Sheets(Sheet_Names(4)).Range("A" & "2:" & "A" & Sheets(Sheet_Names(4)).Cells.SpecialCells(xlCellTypeLastCell).row).Name = "All_Valid_Code_Systems"
+' Saves range to array
+  All_Valid_Code_Systems = Range("All_Valid_Code_Systems")
 
-
-  Sheets(Sheet_Names(0)).Select
+' just for cleaning
+Sheets(Sheet_Names(0)).Select
 
 ' SUB - SCRUBS PREVIOUSLY MAPPED DISPLAYS TO STANDARDIZE FORMAT
 '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
-
+  ufProgress.LabelProgress.Width = 0
+  For i = 1 To UBound(Scrubbed_All_Prev_Mapped_Displays)
+  ' forces progress bar to screen
+    ufProgress.Show
+    pcstdone = i / UBound(Scrubbed_All_Prev_Mapped_Displays)
+  ' cleans format, removes special characters, orders string alphabetically
+    Scrubbed_All_Prev_Mapped_Displays(i, 1) = Utils.Sort_Sub_Strings(Utils.Cleaning(Utils.ReplaceSplChars(Scrubbed_All_Prev_Mapped_Displays(i, 1))))
+  ' updates progress bar
+    With ufProgress
+      .LabelCaption = "Processing Row " & i & " of " & UBound(Scrubbed_All_Prev_Mapped_Displays)
+      .LabelProgress.Width = pcstdone * (.FrameProgress.Width)
+    End With
+    DoEvents
+  ' closes progress bar when done
+    If i = UBound(Scrubbed_All_Prev_Mapped_Displays) Then
+      Unload ufProgress
+    End If
+  Next i
 
 ' SUB - ACTUAL LOGIC TO FIND MATCHES
 ''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 
   ufProgress.LabelProgress.Width = 0
   ufProgress.LabelProgress.BackColor = &H80FF&
-  ufProgress.Show
   For i = 1 To UBound(Final_All_Unmapped_Displays_To_Check)
 
+    ufProgress.Show
     pcstdone = i / UBound(Final_All_Unmapped_Displays_To_Check)
 
     With ufProgress
