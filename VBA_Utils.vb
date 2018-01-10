@@ -17,10 +17,10 @@ End Function
 
 ' Checks if unmapped code is on the medication list.
 Function Medication_Checker(valToBeFound As Variant, arr As Variant, code_system As Variant)
-  Dim display As Variant
+  Dim Display As Variant
   On Error GoTo IsInArrayError:
-  For Each display In arr
-    If LCase(display) = LCase(valToBeFound) Then
+  For Each Display In arr
+    If LCase(Display) = LCase(valToBeFound) Then
       If LCase(code_system) Like "*medication*" Or _
       LCase(code_system) Like "*drug*" Or _
       LCase(code_system) Like "*allergy*" Then
@@ -31,7 +31,7 @@ Function Medication_Checker(valToBeFound As Variant, arr As Variant, code_system
         Exit Function
       End If
     End If
-  Next display
+  Next Display
 IsInArrayError:
   On Error GoTo 0
   Medication_Checker = False
@@ -151,4 +151,31 @@ Function Analysis(Similarity As Variant, Keyword_Check As Variant, Code_System_C
   Else
     Analysis = "Very Weak Match"
   End If
+End Function
+
+
+Function GetOpenFile()
+    Dim fileStr As String
+
+    MsgBox ("Could not automatically detect the Access Database.... Click OK and then select the database from the next popup.")
+
+    File_Path = Application.GetOpenFilename()
+
+    If GetOpenFile = "False" Then
+        GetOpenFile = False
+        Exit Function
+    Else
+        GetOpenFile = File_Path
+    End If
+
+End Function
+
+
+' Tells user the status
+Function Progress(Display)
+  Status_Box.Show False
+  With Status_Box
+    .Display_Text = Display
+  End With
+  DoEvents
 End Function

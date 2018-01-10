@@ -15,7 +15,9 @@ Sub Data_Import()
   Access_File_Path = "Y:\Data Intelligence\Code_Submittion_Database\CodeFeedbackDatabase.accdb"
 
 
-' SUB - Checks to confirm user has path to database mapped correctly. If not, prompt user for file path.
+  ' Progress status display
+  Call Utils.Progress("Checking Data Location....")
+  Utils.Progress ("Checking Data Location....")
 
 ' SUB - Checks to confirm path to Access Database is mapped correctly. If not then it asks the user to get it.
   Set fso = CreateObject("scripting.filesystemobject")
@@ -31,7 +33,7 @@ Sub Data_Import()
       Access_File_Path = Access_Database_Check
     End If
   Else
-  GoTo: DataError
+  GoTo DataError
   End If
   Set fso = Nothing
 
@@ -53,6 +55,7 @@ Sub Data_Import()
   Next sheet
 
   Application.DisplayAlerts = True
+
 
   ' Creates the sheets within the workbook
   For i = 0 To UBound(Sheet_Names)
@@ -126,7 +129,7 @@ Sub Data_Import()
 
 
 DataError:
-  MsgBox("Something went wrong while trying to connect to the data. Exiting now. Please re-run and confirm you pick the correct data source.")
+  MsgBox ("Something went wrong while trying to connect to the data. Exiting now. Please re-run and confirm you pick the correct data source.")
   Exit Sub
 
 
