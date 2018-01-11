@@ -34,7 +34,8 @@ Sub Precedence_Check()
   Dim pcstdone As Single
 
 
-  Application.ScreenUpdating = False
+  ' This disables settings to improve macro performance.
+  Call Utils.Disable_Settings()
 
 
   Sheet_Names = Array("To_Review", "Previously_Mapped", "Medications", "Keywords", "Valid_Code_Systems")
@@ -67,7 +68,7 @@ Sub Precedence_Check()
       End If
     Next Header
     If Header_Check = False Then
-      Application.ScreenUpdating = True
+      Call Utils.Enable_Settings()
       Header_User_Response = InputBox("BORIS was unable to find the header:" & vbNewLine & "'" & To_Review_Headers(i) & "'" & " on the " & Sheet_Names(0) & " sheet. Enter the letter of that column in the text box below to continue the program. Or click cancel to exit program.")
 
       'If user hits cancel then close program.
@@ -77,7 +78,7 @@ Sub Precedence_Check()
         ' enters the title of the column the user just identified
         Range(Header_User_Response & "1").Value = To_Review_Headers(i)
         To_Review_Headers(i) = Header_User_Response
-        Application.ScreenUpdating = False
+        Call Utils.Disable_Settings()
       End If
     End If
   Next i
@@ -98,7 +99,7 @@ Sub Precedence_Check()
       End If
     Next Header
     If Header_Check = False Then
-      Application.ScreenUpdating = True
+      Call Utils.Enable_Settings()
       Header_User_Response = InputBox("BORIS was unable to find the header:" & vbNewLine & "'" & Previously_Mapped_Headers(i) & "'" & " on the " & Sheet_Names(1) & " sheet. Enter the letter of that column in the text box below to continue the program. Or click cancel to exit program.")
 
           'If user hits cancel then close program.
@@ -108,7 +109,7 @@ Sub Precedence_Check()
             ' enters the title of the column the user just identified
         Range(Header_User_Response & "1").Value = Previously_Mapped_Headers(i)
         Previously_Mapped_Headers(i) = Header_User_Response
-        Application.ScreenUpdating = False
+        Call Utils.Disable_Settings()
       End If
     End If
   Next i
@@ -200,21 +201,22 @@ Sub Precedence_Check()
 ' Saves range to array
   All_Valid_Code_Systems = Range("All_Valid_Code_Systems")
 
-' just for cleaning
-Sheets(Sheet_Names(0)).Select
+  ' just for cleaning
+  Sheets(Sheet_Names(0)).Select
 
 ' SUB - SCRUBS PREVIOUSLY MAPPED DISPLAYS TO STANDARDIZE FORMAT
 '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
   ufProgress.LabelProgress.Width = 0
-  For i = 1 To UBound(Scrubbed_All_Prev_Mapped_Displays)
   ' forces progress bar to screen
-    ufProgress.Show
+  ufProgress.Show
+  For i = 1 To UBound(Scrubbed_All_Prev_Mapped_Displays)
+
     pcstdone = i / UBound(Scrubbed_All_Prev_Mapped_Displays)
   ' cleans format, removes special characters, orders string alphabetically
     Scrubbed_All_Prev_Mapped_Displays(i, 1) = Utils.Sort_Sub_Strings(Utils.Cleaning(Utils.ReplaceSplChars(Scrubbed_All_Prev_Mapped_Displays(i, 1))))
   ' updates progress bar
     With ufProgress
-      .LabelCaption = "Processing Row " & i & " of " & UBound(Scrubbed_All_Prev_Mapped_Displays)
+      .LabelCaption = "Cleaning Data... Processing Row " & i & " of " & UBound(Scrubbed_All_Prev_Mapped_Displays)
       .LabelProgress.Width = pcstdone * (.FrameProgress.Width)
     End With
     DoEvents
@@ -229,9 +231,9 @@ Sheets(Sheet_Names(0)).Select
 
   ufProgress.LabelProgress.Width = 0
   ufProgress.LabelProgress.BackColor = &H80FF&
+  ufProgress.Show
   For i = 1 To UBound(Final_All_Unmapped_Displays_To_Check)
 
-    ufProgress.Show
     pcstdone = i / UBound(Final_All_Unmapped_Displays_To_Check)
 
     With ufProgress
@@ -328,7 +330,6 @@ User_Exit:
   Range("Match_Response").Value = Final_All_Match_Responses
   Range("All_Similarities").Value = Final_All_Similarities
 
-  Application.StatusBar = False
   Application.ScreenUpdating = True
 
 End Sub

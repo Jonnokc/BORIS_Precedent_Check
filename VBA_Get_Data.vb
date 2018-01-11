@@ -7,19 +7,23 @@ Sub Data_Import()
   Dim LastRow As Long
   Dim Data_Done As Single
 
-
+  Call Utils.Enable_Settings()
 
   Sheet_Names = Array("Medications", "Keywords", "Valid_Code_Systems", "Previously_Mapped")
+
   Access_Tbl_Names = Array("Q_All_Medication_Raw_Code_Displays_Excel", "Proprietary_Code_Display_Keywords", "Mappable_Raw_Code_System_Names", "Q_Raw_Codes_To_Concept_Alias_2017")
 
   Access_File_Path = "Y:\Data Intelligence\Code_Submittion_Database\CodeFeedbackDatabase.accdb"
 
 
-  ' Progress status display
-  Call Utils.Progress("Checking Data Location....")
-  Utils.Progress ("Checking Data Location....")
 
 ' SUB - Checks to confirm path to Access Database is mapped correctly. If not then it asks the user to get it.
+''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+
+  ' Progress status display
+  Call Utils.Progress("Checking Data Location....")
+
+
   Set fso = CreateObject("scripting.filesystemobject")
   With fso
     Path_Checker = Len(Dir("Y:\Data Intelligence\Code_Database\Data_Intelligence_Code_Database.accdb")) <> 0
@@ -27,19 +31,25 @@ Sub Data_Import()
 
   If Path_Checker = 0 Then
     Access_Database_Check = Utils.GetOpenFile()
-    If Access_Database_Check = False Then
 
+    If Access_Database_Check = False Then
+      GoTo DataError
     Else
       Access_File_Path = Access_Database_Check
     End If
-  Else
-  GoTo DataError
   End If
+
   Set fso = Nothing
+
+  ' Closes the status popup
+  Call Utils.Progress_Close
 
 
 ' SUB - Delets all the extra sheets and then readds them to make sure things remain clean
-''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+
+  ' Progress status display
+  Call Utils.Progress("Cleaning Sheets")
 
   ' Deletes extra sheet
   Application.DisplayAlerts = False
@@ -64,14 +74,16 @@ Sub Data_Import()
     End With
   Next i
 
+' Closes the status popup
+  Call Utils.Progress_Close
 
 ' SUB - Imports all the data to the correct sheet
 ''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 
   ufProgress.LabelProgress.Width = 0
+  ufProgress.Show
   For i = 0 To UBound(Sheet_Names)
 
-    ufProgress.Show
     Data_Done = i / UBound(Sheet_Names)
 
   ' updates progress bar
@@ -128,10 +140,15 @@ Sub Data_Import()
   End With
 
 
-DataError:
-  MsgBox ("Something went wrong while trying to connect to the data. Exiting now. Please re-run and confirm you pick the correct data source.")
-  Exit Sub
+Call Utils.Disable_Settings()
 
+Exit Sub
+
+
+DataError:
+' Turns back on
+Call Utils.Enable_Settings()
+  MsgBox ("Something went wrong while trying to connect to the data. Exiting now. Please re-run and confirm you pick the correct data source.")
 
 
 End Sub

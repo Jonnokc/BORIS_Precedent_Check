@@ -179,3 +179,24 @@ Function Progress(Display)
   End With
   DoEvents
 End Function
+
+' Closes the status box
+Function Progress_Close()
+  Unload Status_Box
+End Function
+
+
+' Disables Settings
+Function Disable_Settings()
+  Application.ScreenUpdating = False
+  Application.Calculation = xlCalculationManual
+  Application.EnableEvents = False
+End Function
+
+
+' Enables Settings
+Function Enable_Settings()
+  Application.ScreenUpdating = True
+  Application.Calculation = xlCalculationAutomatic
+  Application.EnableEvents = True
+End Function
