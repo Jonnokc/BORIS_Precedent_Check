@@ -35,13 +35,13 @@ Sub Precedence_Check()
 
 
   ' This disables settings to improve macro performance.
-  Call Utils.Disable_Settings()
+  Call Utils.Disable_Settings
 
 
   Sheet_Names = Array("To_Review", "Previously_Mapped", "Medications", "Keywords", "Valid_Code_Systems")
-  To_Review_Headers = Array("RAW_CODE_DISPLAY", "RAW_CODE_SYSTEM_NAME", "RAW_CODE_SYSTEM_ID", "DATA_MODEL", "Precdent Closest Match", "Precedent Raw Code System ID(s)", "Precdent Concept Alias", "MATCH_RESPONSE", "Precident Map Count", "Similarity")
+  To_Review_Headers = Array("RAW_CODE_DISPLAY", "RAW_CODE_SYSTEM_NAME", "RAW_CODE_SYSTEM_ID", "Precedent Closest Match", "Precedent Raw Code System ID(s)", "Precedent Concept Alias", "MATCH_RESPONSE", "Precedent Map Count", "Similarity")
   Previously_Mapped_Headers = Array("Raw Code Display", "Map Count", "Precedent Raw Code System ID(s)", "Concept Alias")
-  New_Headers = Array("Closest Match", "Precedent Raw Code System ID(s)", "Precdent Concept Alias", "Similarity")
+  New_Headers = Array("Closest Match", "Precedent Raw Code System ID(s)", "Precedent Concept Alias", "Similarity")
   Medication_Headers = Array("drug_name")
   Keywords_Headers = Array("Keywords")
   Valid_Code_Sys_Headers = Array("Code_Systems")
@@ -49,12 +49,24 @@ Sub Precedence_Check()
 
   ' SUB - IMPORTS DATA FROM DATABASE
   '''''''''''''''''''''''''''''''''''''''''
-  Call Get_Data.Data_Import
+
+  ' Imports the data from the database
+  ' Call Get_data.Data_Import
 
 
 
-' Checks the 'To_Review sheet to confirm the headers are all there.
+  ' Checks the 'To_Review sheet to confirm the headers are all there.
   Sheets(Sheet_Names(0)).Select
+
+  ' Adds precedence check headers to the to review sheet
+  For i = 3 To UBound(To_Review_Headers)
+    Add_Header = Mid(Cells(2, Columns.Count).End(xlToLeft).Offset(0, 1).Address, 2, 1)
+    Range(Add_Header & "1") = To_Review_Headers(i)
+  Next i
+
+
+
+
   Range("A1").Select
   Range("A1", Selection.End(xlToRight)).Name = "Header_row"
 
@@ -68,23 +80,23 @@ Sub Precedence_Check()
       End If
     Next Header
     If Header_Check = False Then
-      Call Utils.Enable_Settings()
-      Header_User_Response = InputBox("BORIS was unable to find the header:" & vbNewLine & "'" & To_Review_Headers(i) & "'" & " on the " & Sheet_Names(0) & " sheet. Enter the letter of that column in the text box below to continue the program. Or click cancel to exit program.")
+      Call Utils.Enable_Settings
+      Header_User_Response = InputBox("BORIS was unable to find the header:" & vbNewLine & "'" & To_Review_Headers(i) & "'" & " on the " & Sheet_Names(1) & " sheet. Enter the letter of that column in the text box below to continue the program. Or click cancel to exit program.")
 
-      'If user hits cancel then close program.
+        'If user hits cancel then close program.
       If Header_User_Response = vbNullString Then
         GoTo User_Exit
       Else
-        ' enters the title of the column the user just identified
+          ' enters the title of the column the user just identified
         Range(Header_User_Response & "1").Value = To_Review_Headers(i)
         To_Review_Headers(i) = Header_User_Response
-        Call Utils.Disable_Settings()
+        Call Utils.Disable_Settings
       End If
     End If
   Next i
 
 
-    ' Checks and stores all the header locations for the Previously mapped sheet.
+  ' Checks and stores all the header locations for the Previously mapped sheet.
   Sheets(Sheet_Names(1)).Select
   Range("A1").Select
   Range("A1", Selection.End(xlToRight)).Name = "Header_row"
@@ -99,7 +111,7 @@ Sub Precedence_Check()
       End If
     Next Header
     If Header_Check = False Then
-      Call Utils.Enable_Settings()
+      Call Utils.Enable_Settings
       Header_User_Response = InputBox("BORIS was unable to find the header:" & vbNewLine & "'" & Previously_Mapped_Headers(i) & "'" & " on the " & Sheet_Names(1) & " sheet. Enter the letter of that column in the text box below to continue the program. Or click cancel to exit program.")
 
           'If user hits cancel then close program.
@@ -109,103 +121,104 @@ Sub Precedence_Check()
             ' enters the title of the column the user just identified
         Range(Header_User_Response & "1").Value = Previously_Mapped_Headers(i)
         Previously_Mapped_Headers(i) = Header_User_Response
-        Call Utils.Disable_Settings()
+        Call Utils.Disable_Settings
       End If
     End If
   Next i
-
 
 
 ' SUB - Saves all the data to Memory
 ''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 
   ' Names the currently unmapped proprietary code displays as a range
-  Sheets(Sheet_Names(0)).Range(To_Review_Headers(0) & "2:" & To_Review_Headers(0) & Sheets(Sheet_Names(0)).Cells.SpecialCells(xlCellTypeLastCell).row).Name = "All_Unmapped_Displays_To_Check"
+  Sheets(Sheet_Names(0)).Range(To_Review_Headers(0) & "2:" & To_Review_Headers(0) & Sheets(Sheet_Names(0)).Cells.SpecialCells(xlCellTypeLastCell).Row).Name = "All_Unmapped_Displays_To_Check"
 'Saves range to array
   Final_All_Unmapped_Displays_To_Check = Range("All_Unmapped_Displays_To_Check").Value
 
 ' Names the raw code systems to check column as a range
-  Sheets(Sheet_Names(0)).Range(To_Review_Headers(1) & "2:" & To_Review_Headers(1) & Sheets(Sheet_Names(0)).Cells.SpecialCells(xlCellTypeLastCell).row).Name = "All_Raw_Code_System_Names_To_Check"
+  Sheets(Sheet_Names(0)).Range(To_Review_Headers(1) & "2:" & To_Review_Headers(1) & Sheets(Sheet_Names(0)).Cells.SpecialCells(xlCellTypeLastCell).Row).Name = "All_Raw_Code_System_Names_To_Check"
 'Saves range to array
   Final_All_Code_Systems_To_Check = Range("All_Raw_Code_System_Names_To_Check").Value
 
 ' Names the final results closest match column as a range
-  Sheets(Sheet_Names(0)).Range(To_Review_Headers(4) & "2:" & To_Review_Headers(4) & Sheets(Sheet_Names(0)).Cells.SpecialCells(xlCellTypeLastCell).row).Name = "All_Precedent_Closest_Match_Results"
+  Sheets(Sheet_Names(0)).Range(To_Review_Headers(3) & "2:" & To_Review_Headers(3) & Sheets(Sheet_Names(0)).Cells.SpecialCells(xlCellTypeLastCell).Row).Name = "All_Precedent_Closest_Match_Results"
 'Saves range to array
   Final_All_Precedent_Closest_Match_Results = Range("All_Precedent_Closest_Match_Results").Value
 
 ' Names the final results map count column as a range
-  Sheets(Sheet_Names(0)).Range(To_Review_Headers(8) & "2:" & To_Review_Headers(8) & Sheets(Sheet_Names(0)).Cells.SpecialCells(xlCellTypeLastCell).row).Name = "All_Precedent_Map_Count"
+  Sheets(Sheet_Names(0)).Range(To_Review_Headers(7) & "2:" & To_Review_Headers(7) & Sheets(Sheet_Names(0)).Cells.SpecialCells(xlCellTypeLastCell).Row).Name = "All_Precedent_Map_Count"
 'Saves range to array
   Final_All_Precedent_Map_Count = Range("All_Precedent_Map_Count").Value
 
 ' Names the final results code system id column as a range
-  Sheets(Sheet_Names(0)).Range(To_Review_Headers(5) & "2:" & To_Review_Headers(5) & Sheets(Sheet_Names(0)).Cells.SpecialCells(xlCellTypeLastCell).row).Name = "Precedent_Code_System_Matches"
+  Sheets(Sheet_Names(0)).Range(To_Review_Headers(4) & "2:" & To_Review_Headers(4) & Sheets(Sheet_Names(0)).Cells.SpecialCells(xlCellTypeLastCell).Row).Name = "Precedent_Code_System_Matches"
 'Saves range to array
   Final_Precedent_Code_System_IDs = Range("Precedent_Code_System_Matches").Value
 
 ' Names the final results concept alias column as a range
-  Sheets(Sheet_Names(0)).Range(To_Review_Headers(6) & "2:" & To_Review_Headers(6) & Sheets(Sheet_Names(0)).Cells.SpecialCells(xlCellTypeLastCell).row).Name = "Precedent_Concept_Alias_Matches"
+  Sheets(Sheet_Names(0)).Range(To_Review_Headers(5) & "2:" & To_Review_Headers(5) & Sheets(Sheet_Names(0)).Cells.SpecialCells(xlCellTypeLastCell).Row).Name = "Precedent_Concept_Alias_Matches"
 'Saves range to array
   Final_Precedent_Concept_Aliases = Range("Precedent_Concept_Alias_Matches").Value
 
 ' Names the Match Response column as a range
-  Sheets(Sheet_Names(0)).Range(To_Review_Headers(7) & "2:" & To_Review_Headers(7) & Sheets(Sheet_Names(0)).Cells.SpecialCells(xlCellTypeLastCell).row).Name = "Match_Response"
+  Sheets(Sheet_Names(0)).Range(To_Review_Headers(6) & "2:" & To_Review_Headers(6) & Sheets(Sheet_Names(0)).Cells.SpecialCells(xlCellTypeLastCell).Row).Name = "Match_Response"
 'Saves range to array
   Final_All_Match_Responses = Range("Match_Response").Value
 
 ' Names the similarity column as a range
-  Sheets(Sheet_Names(0)).Range(To_Review_Headers(9) & "2:" & To_Review_Headers(9) & Sheets(Sheet_Names(0)).Cells.SpecialCells(xlCellTypeLastCell).row).Name = "All_Similarities"
+  Sheets(Sheet_Names(0)).Range(To_Review_Headers(8) & "2:" & To_Review_Headers(8) & Sheets(Sheet_Names(0)).Cells.SpecialCells(xlCellTypeLastCell).Row).Name = "All_Similarities"
 'Saves range to array
   Final_All_Similarities = Range("All_Similarities").Value
 
 ' Names the already validated raw code displays as a range
-  Sheets(Sheet_Names(1)).Range(Previously_Mapped_Headers(0) & "2:" & Previously_Mapped_Headers(0) & Sheets(Sheet_Names(1)).Cells.SpecialCells(xlCellTypeLastCell).row).Name = "Previously_Mapped_Displays"
+  Sheets(Sheet_Names(1)).Range(Previously_Mapped_Headers(0) & "2:" & Previously_Mapped_Headers(0) & Sheets(Sheet_Names(1)).Cells.SpecialCells(xlCellTypeLastCell).Row).Name = "Previously_Mapped_Displays"
 'Saves range to array
   All_Prev_Mapped_Displays = Range("Previously_Mapped_Displays").Value
   ' used for storing scrubbed version
   Scrubbed_All_Prev_Mapped_Displays = Range("Previously_Mapped_Displays").Value
 
 ' Names the Previously mapped map count as a range
-  Sheets(Sheet_Names(1)).Range(Previously_Mapped_Headers(1) & "2:" & Previously_Mapped_Headers(1) & Sheets(Sheet_Names(1)).Cells.SpecialCells(xlCellTypeLastCell).row).Name = "Previously_Mapped_Map_Count"
+  Sheets(Sheet_Names(1)).Range(Previously_Mapped_Headers(1) & "2:" & Previously_Mapped_Headers(1) & Sheets(Sheet_Names(1)).Cells.SpecialCells(xlCellTypeLastCell).Row).Name = "Previously_Mapped_Map_Count"
 'Saves range to array
   All_Prev_Mapped_Map_Count = Range("Previously_Mapped_Map_Count").Value
 
 ' Names the previously mapped data models as a range
-  Sheets(Sheet_Names(1)).Range(Previously_Mapped_Headers(2) & "2:" & Previously_Mapped_Headers(2) & Sheets(Sheet_Names(1)).Cells.SpecialCells(xlCellTypeLastCell).row).Name = "Previously_Mapped_Data_Models"
+  Sheets(Sheet_Names(1)).Range(Previously_Mapped_Headers(2) & "2:" & Previously_Mapped_Headers(2) & Sheets(Sheet_Names(1)).Cells.SpecialCells(xlCellTypeLastCell).Row).Name = "Previously_Mapped_Data_Models"
 'Saves range to array
   All_Prev_Mapped_Data_Models = Range("Previously_Mapped_Data_Models").Value
 
 ' Names the previously mapped code systems ids as a range
-  Sheets(Sheet_Names(1)).Range(Previously_Mapped_Headers(3) & "2:" & Previously_Mapped_Headers(3) & Sheets(Sheet_Names(1)).Cells.SpecialCells(xlCellTypeLastCell).row).Name = "Previously_Mapped_Code_Systems"
+  Sheets(Sheet_Names(1)).Range(Previously_Mapped_Headers(3) & "2:" & Previously_Mapped_Headers(3) & Sheets(Sheet_Names(1)).Cells.SpecialCells(xlCellTypeLastCell).Row).Name = "Previously_Mapped_Code_Systems"
 'Saves range to array
   All_Prev_Mapped_Code_Systems = Range("Previously_Mapped_Code_Systems").Value
 
 ' Names the previously mapped concept aliases as a range
-  Sheets(Sheet_Names(1)).Range(Previously_Mapped_Headers(3) & "2:" & Previously_Mapped_Headers(3) & Sheets(Sheet_Names(1)).Cells.SpecialCells(xlCellTypeLastCell).row).Name = "Previously_Mapped_Concept_Alias"
+  Sheets(Sheet_Names(1)).Range(Previously_Mapped_Headers(3) & "2:" & Previously_Mapped_Headers(3) & Sheets(Sheet_Names(1)).Cells.SpecialCells(xlCellTypeLastCell).Row).Name = "Previously_Mapped_Concept_Alias"
 'Saves range to array
   All_Prev_Mapped_Concept_Aliases = Range("Previously_Mapped_Concept_Alias").Value
 
 ' Names the Medication displays as a Range
-  Sheets(Sheet_Names(2)).Range("A" & "2:" & "A" & Sheets(Sheet_Names(2)).Cells.SpecialCells(xlCellTypeLastCell).row).Name = "All_Medication_Displays"
+  Sheets(Sheet_Names(2)).Range("A" & "2:" & "A" & Sheets(Sheet_Names(2)).Cells.SpecialCells(xlCellTypeLastCell).Row).Name = "All_Medication_Displays"
 ' Saves range to array
   All_Prev_Medication_Displays = Range("All_Medication_Displays")
 
 ' Names the Keywords displays as a Range
-  Sheets(Sheet_Names(3)).Range("A" & "2:" & "A" & Sheets(Sheet_Names(3)).Cells.SpecialCells(xlCellTypeLastCell).row).Name = "All_Keywords_Displays"
+  Sheets(Sheet_Names(3)).Range("A" & "2:" & "A" & Sheets(Sheet_Names(3)).Cells.SpecialCells(xlCellTypeLastCell).Row).Name = "All_Keywords_Displays"
 ' Saves range to array
   All_Prev_Keywords_Displays = Range("All_Keywords_Displays")
 
 ' Names the valid code systems as a range
-  Sheets(Sheet_Names(4)).Range("A" & "2:" & "A" & Sheets(Sheet_Names(4)).Cells.SpecialCells(xlCellTypeLastCell).row).Name = "All_Valid_Code_Systems"
+  Sheets(Sheet_Names(4)).Range("A" & "2:" & "A" & Sheets(Sheet_Names(4)).Cells.SpecialCells(xlCellTypeLastCell).Row).Name = "All_Valid_Code_Systems"
 ' Saves range to array
   All_Valid_Code_Systems = Range("All_Valid_Code_Systems")
 
   ' just for cleaning
   Sheets(Sheet_Names(0)).Select
 
+
 ' SUB - SCRUBS PREVIOUSLY MAPPED DISPLAYS TO STANDARDIZE FORMAT
 '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+
   ufProgress.LabelProgress.Width = 0
   ' forces progress bar to screen
   ufProgress.Show
@@ -228,6 +241,9 @@ Sub Precedence_Check()
 
 ' SUB - ACTUAL LOGIC TO FIND MATCHES
 ''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+  ' Calls status update for user
+  Call Utils.Progress("Getting Ready to check codes....")
+  Call Utils.Progress_Close
 
   ufProgress.LabelProgress.Width = 0
   ufProgress.LabelProgress.BackColor = &H80FF&
@@ -237,7 +253,7 @@ Sub Precedence_Check()
     pcstdone = i / UBound(Final_All_Unmapped_Displays_To_Check)
 
     With ufProgress
-      .LabelCaption = "You see me I be work, work, work, work, work.... " & i & " of " & UBound(Final_All_Unmapped_Displays_To_Check)
+      .LabelCaption = "Processing Data....You see me I be work, work, work, work, work.... " & i & " of " & UBound(Final_All_Unmapped_Displays_To_Check)
       .LabelProgress.Width = pcstdone * (.FrameProgress.Width)
     End With
     DoEvents
@@ -330,6 +346,9 @@ User_Exit:
   Range("Match_Response").Value = Final_All_Match_Responses
   Range("All_Similarities").Value = Final_All_Similarities
 
-  Application.ScreenUpdating = True
+  ' Program done.
+  Call Utils.Enable_Settings
+  Call Utils.User_Exit
+
 
 End Sub

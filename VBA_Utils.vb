@@ -14,7 +14,6 @@ IsInArrayError:
   IsInArray = False
 End Function
 
-
 ' Checks if unmapped code is on the medication list.
 Function Medication_Checker(valToBeFound As Variant, arr As Variant, code_system As Variant)
   Dim Display As Variant
@@ -37,12 +36,10 @@ IsInArrayError:
   Medication_Checker = False
 End Function
 
-
   ' Cleans string to remove extra spaces and put in lower case
 Function Cleaning(text As Variant)
   Cleaning = WorksheetFunction.Clean(Trim(LCase(text)))
 End Function
-
 
 ' Checks code system to see if code system is within best matches
 Function Valid_Code_Sys_Checker(unmapped_code_sys As Variant, All_Valid_Code_Systems As Variant) As Boolean
@@ -60,8 +57,6 @@ Function Valid_Code_Sys_Checker(unmapped_code_sys As Variant, All_Valid_Code_Sys
   Valid_Code_Sys_Checker = False
 End Function
 
-
-
   ' Checks code system to see if code system is within best matches
 Function Code_System_Check(unmapped_code_sys As Variant, Prev_Code_Sys As Variant) As Boolean
   If InStr(unmapped_code_sys, ":") > 0 Then
@@ -71,7 +66,6 @@ Function Code_System_Check(unmapped_code_sys As Variant, Prev_Code_Sys As Varian
   End If
   Code_System_Check = InStr(LCase(Prev_Code_Sys), LCase(To_Check))
 End Function
-
 
 ' Sorts all words in string alphabetically
 Function Sort_Sub_Strings(DelimitedString As Variant, Optional Delimiter As String = " ", Optional SortDescending = False) As String
@@ -103,7 +97,6 @@ Function Sort_Sub_Strings(DelimitedString As Variant, Optional Delimiter As Stri
   End If
 End Function
 
-
 ' Replaces the special characters with nothing.
 Function ReplaceSplChars(strIn As Variant) As String
   Dim objRegex As Object
@@ -114,7 +107,6 @@ Function ReplaceSplChars(strIn As Variant) As String
     ReplaceSplChars = Application.Trim(.Replace(strIn, vbNullString))
   End With
 End Function
-
 
 ' Checks each word in a display against the keywords table to see if there is a match
 Function Keyword_Checker(text As Variant, arr As Variant) As Variant
@@ -130,7 +122,6 @@ Function Keyword_Checker(text As Variant, arr As Variant) As Variant
   Next i
   Keyword_Checker = False
 End Function
-
 
 ' Returns analysis of match
 Function Analysis(Similarity As Variant, Keyword_Check As Variant, Code_System_Check_Answer As Variant, Medication_Check As Variant)
@@ -153,30 +144,31 @@ Function Analysis(Similarity As Variant, Keyword_Check As Variant, Code_System_C
   End If
 End Function
 
-
 Function GetOpenFile()
-    Dim fileStr As String
+  Dim fileStr As String
 
-    MsgBox ("Could not automatically detect the Access Database.... Click OK and then select the database from the next popup.")
+  MsgBox ("Could not automatically detect the Access Database.... Click OK and then select the database from the next popup.")
 
-    File_Path = Application.GetOpenFilename()
+  File_Path = Application.GetOpenFilename()
 
-    If GetOpenFile = "False" Then
-        GetOpenFile = False
-        Exit Function
-    Else
-        GetOpenFile = File_Path
-    End If
+  If GetOpenFile = "False" Then
+    GetOpenFile = False
+    Exit Function
+  Else
+    GetOpenFile = File_Path
+  End If
 
 End Function
-
 
 ' Tells user the status
 Function Progress(Display)
   Status_Box.Show False
   With Status_Box
     .Display_Text = Display
+    ' Pauses for 3 seconds so user can see the popup
+    Application.Wait (Now + TimeValue("0:00:04"))
   End With
+
   DoEvents
 End Function
 
@@ -185,7 +177,6 @@ Function Progress_Close()
   Unload Status_Box
 End Function
 
-
 ' Disables Settings
 Function Disable_Settings()
   Application.ScreenUpdating = False
@@ -193,10 +184,13 @@ Function Disable_Settings()
   Application.EnableEvents = False
 End Function
 
-
 ' Enables Settings
 Function Enable_Settings()
   Application.ScreenUpdating = True
   Application.Calculation = xlCalculationAutomatic
   Application.EnableEvents = True
+End Function
+
+Function User_Exit()
+  MsgBox ("All Done! Make sure you save the file.")
 End Function
