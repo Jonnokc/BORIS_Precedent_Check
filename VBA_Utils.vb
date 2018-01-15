@@ -45,11 +45,14 @@ End Function
 Function Valid_Code_Sys_Checker(unmapped_code_sys As Variant, All_Valid_Code_Systems As Variant) As Boolean
   If InStr(unmapped_code_sys, ":") > 0 Then
     To_Check = Mid(unmapped_code_sys, InStr(unmapped_code_sys, ":") + 1, 200)
+        If InStr(To_Check, ":") > 0 Then
+            To_Check = Left(To_Check, InStr(To_Check, ":") - 1)
+        End If
   Else
     To_Check = unmapped_code_sys
   End If
   For i = 1 To UBound(All_Valid_Code_Systems)
-    If unmapped_code_sys = All_Valid_Code_Systems(i, 1) Then
+    If LCase(To_Check) = LCase(All_Valid_Code_Systems(i, 1)) Then
       Valid_Code_Sys_Checker = True
       Exit Function
     End If
@@ -57,7 +60,7 @@ Function Valid_Code_Sys_Checker(unmapped_code_sys As Variant, All_Valid_Code_Sys
   Valid_Code_Sys_Checker = False
 End Function
 
-  ' Checks code system to see if code system is within best matches
+' Checks code system to see if code system is within best matches
 Function Code_System_Check(unmapped_code_sys As Variant, Prev_Code_Sys As Variant) As Boolean
   If InStr(unmapped_code_sys, ":") > 0 Then
     To_Check = Mid(unmapped_code_sys, InStr(unmapped_code_sys, ":") + 1, 200)
@@ -99,13 +102,18 @@ End Function
 
 ' Replaces the special characters with nothing.
 Function ReplaceSplChars(strIn As Variant) As String
+On Error GoTo Text_Error
   Dim objRegex As Object
   Set objRegex = CreateObject("vbscript.regexp")
   With objRegex
     .Pattern = "()[^\w\s@]+"
     .Global = True
     ReplaceSplChars = Application.Trim(.Replace(strIn, vbNullString))
+    Exit Function
   End With
+  ' error handling to catch invalid displays that are just special characters
+Text_Error:
+    ReplaceSplChars = strIn
 End Function
 
 ' Checks each word in a display against the keywords table to see if there is a match
@@ -166,7 +174,7 @@ Function Progress(Display)
   With Status_Box
     .Display_Text = Display
     ' Pauses for 3 seconds so user can see the popup
-    Application.Wait (Now + TimeValue("0:00:04"))
+    Application.Wait (Now + TimeValue("0:00:03"))
   End With
 
   DoEvents
@@ -176,6 +184,12 @@ End Function
 Function Progress_Close()
   Unload Status_Box
 End Function
+
+Sub Del_Named_Ranges()
+  For Each N In ActiveWorkbook.Names
+      N.Delete
+  Next
+End Sub
 
 ' Disables Settings
 Function Disable_Settings()
@@ -191,6 +205,55 @@ Function Enable_Settings()
   Application.EnableEvents = True
 End Function
 
+' All done
 Function User_Exit()
   MsgBox ("All Done! Make sure you save the file.")
+  End
 End Function
+
+' Checks to see if process has run before and see if user wants to continue where left off or begin again
+Function Continue_Check(Column)
+  On Error GoTo All_Blank
+  NextFree = Range(Column & "2:" & Column & Rows.Count).Cells.SpecialCells(xlCellTypeBlanks).Row
+
+  If NextFree <> 2 Then
+    Continue_Check_Response = MsgBox("Looks like you have ran this before. Do you want to continue from row " & NextFree & "?" & vbNewLine & vbNewLine & "Click 'Yes' to continue or 'No' to begin again.", vbYesNo + vbQuestion, "BORIS!")
+
+    If Continue_Check_Response = vbYes Then
+      Continue_Check = (NextFree - 1)
+      Exit Function
+    Else
+      Continue_Check = 1
+    End If
+  Else
+  All_Blank:
+    Continue_Check = 1
+  End If
+End Function
+
+' Checks if string is alphabetic
+Function IsLetter(strValue As String) As Boolean
+    Dim intPos As Integer
+    For intPos = 1 To Len(strValue)
+        Select Case Asc(Mid(strValue, intPos, 1))
+            Case 65 To 90, 97 To 122
+                IsLetter = True
+            Case Else
+                IsLetter = False
+                Exit For
+        End Select
+    Next
+End Function
+
+
+' Writes Data to File
+Sub Write_Data(Final_All_Precedent_Closest_Match_Results, Final_Precedent_Code_System_IDs, Final_Precedent_Concept_Aliases, Final_All_Precedent_Map_Count, Final_All_Match_Responses, Final_All_Similarities)
+
+  Range("All_Precedent_Closest_Match_Results").Value = Final_All_Precedent_Closest_Match_Results
+  Range("Precedent_Code_System_Matches").Value = Final_Precedent_Code_System_IDs
+  Range("Precedent_Concept_Alias_Matches").Value = Final_Precedent_Concept_Aliases
+  Range("All_Precedent_Map_Count").Value = Final_All_Precedent_Map_Count
+  Range("Match_Response").Value = Final_All_Match_Responses
+  Range("All_Similarities").Value = Final_All_Similarities
+
+End Sub

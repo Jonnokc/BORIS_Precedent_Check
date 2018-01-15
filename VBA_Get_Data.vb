@@ -91,7 +91,7 @@ Sub Data_Import()
 
    Data_Done = i / UBound(Sheet_Names)
 
- ' updates progress bar
+   ' updates progress bar
    With ufProgress
      .LabelCaption = "Getting All the Data! On dataset " & (i + 1) & " of " & (UBound(Sheet_Names) + 1)
      .LabelProgress.Width = Data_Done * (.FrameProgress.Width)
@@ -125,10 +125,10 @@ Sub Data_Import()
      .Refresh BackgroundQuery:=False
    End With
 
- ' Breaks the link so the database isn't locked in read only.
+   ' Breaks the link so the database isn't locked in read only.
    Sheets(Sheet_Names(i)).ListObjects(Sheet_Names(i)).Unlink
 
- ' closes progress bar when done
+   ' Closes progress bar when done
    If i = UBound(Sheet_Names) Then
      Unload ufProgress
    End If
@@ -136,13 +136,13 @@ Sub Data_Import()
  Next i
 
 
-' Removes duplicates from the Previously_Mapped sheet so there is only one Raw Code Display
- With Sheets(Sheet_Names(3))
-   Sheets(Sheet_Names(3)).Select
-   Set StartCell = .Range("A1")
-   LastRow = StartCell.SpecialCells(xlCellTypeLastCell).row
-   .Range(Sheet_Names(3)).RemoveDuplicates Columns:=1, Header:=xlYes
- End With
+  ' Removes duplicates from the Previously_Mapped sheet so there is only one Raw Code Display
+  With Sheets(Sheet_Names(3))
+    Sheets(Sheet_Names(3)).Select
+    Set StartCell = .Range("A1")
+    LastRow = StartCell.SpecialCells(xlCellTypeLastCell).row
+    .Range(Sheet_Names(3)).RemoveDuplicates Columns:=1, Header:=xlYes
+  End With
 
 ' Disables settings to improve performance
 Call Utils.Disable_Settings
