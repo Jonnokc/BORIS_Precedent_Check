@@ -1,3 +1,5 @@
+Option Private Module
+
 'DESCRIPTION: Function to check if a value is in an array of values
 Function IsInArray(valToBeFound As Variant, arr As Variant) As Boolean
   Dim element As Variant
@@ -255,5 +257,67 @@ Sub Write_Data(Final_All_Precedent_Closest_Match_Results, Final_Precedent_Code_S
   Range("All_Precedent_Map_Count").Value = Final_All_Precedent_Map_Count
   Range("Match_Response").Value = Final_All_Match_Responses
   Range("All_Similarities").Value = Final_All_Similarities
+End Sub
+
+
+' Deletes extra sheets / Cleanup
+Sub Delete_Extra_Sheets()
+
+    Dim sheet As Worksheet
+
+    Application.DisplayAlerts = False
+
+    For Each sheet In Worksheets
+
+        If sheet.Name = "Medications" _
+           Or sheet.Name = "Keywords" _
+           Or sheet.Name = "Valid_Code_Systems" _
+           Or sheet.Name = "Previously_Mapped" _
+           Then
+            sheet.Delete
+        End If
+    Next sheet
+
+    Application.DisplayAlerts = True
+
+End Sub
+
+
+' Adds color rule
+Sub color(Similarity_Column)
+
+    Columns(Similarity_Column & ":" & Similarity_Column).Select
+    Selection.FormatConditions.AddColorScale ColorScaleType:=3
+    Selection.FormatConditions(Selection.FormatConditions.Count).SetFirstPriority
+    Selection.FormatConditions(1).ColorScaleCriteria(1).Type = _
+        xlConditionValueNumber
+    Selection.FormatConditions(1).ColorScaleCriteria(1).Value = 0
+    With Selection.FormatConditions(1).ColorScaleCriteria(1).FormatColor
+        .color = 7039480
+        .TintAndShade = 0
+    End With
+    Selection.FormatConditions(1).ColorScaleCriteria(2).Type = _
+        xlConditionValueNumber
+    Selection.FormatConditions(1).ColorScaleCriteria(2).Value = 0.5
+    With Selection.FormatConditions(1).ColorScaleCriteria(2).FormatColor
+        .color = 8711167
+        .TintAndShade = 0
+    End With
+    Selection.FormatConditions(1).ColorScaleCriteria(3).Type = _
+        xlConditionValueNumber
+    Selection.FormatConditions(1).ColorScaleCriteria(3).Value = 1
+    With Selection.FormatConditions(1).ColorScaleCriteria(3).FormatColor
+        .color = 8109667
+        .TintAndShade = 0
+    End With
+    
+End Sub
+
+' Deletes conditional formatting
+Sub Delete_CF(Sht, Column)
+
+    With Sht.Range(Column & ":" & Column)
+        .FormatConditions.Delete
+    End With
 
 End Sub

@@ -59,6 +59,9 @@ Sub Precedence_Check()
   ' Deletes named ranges if they exist
   Call Utils.Del_Named_Ranges
 
+  ' Deletes conditional formatting
+  Call Utils.Delete_CF(Sheet_Names(0), To_Review_Headers(8))
+
 
 
   ' Checks the 'To_Review sheet to confirm the headers are all there.
@@ -374,24 +377,20 @@ Sub Precedence_Check()
 
 User_Exit:
 
-' TODO - add error handling so if user cancels that current progress is written to file.
-
   ' Writes the results back to the table.
-
   Call Utils.Write_Data(Final_All_Precedent_Closest_Match_Results, Final_Precedent_Code_System_IDs, Final_Precedent_Concept_Aliases, Final_All_Precedent_Map_Count, Final_All_Match_Responses, Final_All_Similarities)
 
-  ' Range("All_Precedent_Closest_Match_Results").Value = Final_All_Precedent_Closest_Match_Results
-  ' Range("Precedent_Code_System_Matches").Value = Final_Precedent_Code_System_IDs
-  ' Range("Precedent_Concept_Alias_Matches").Value = Final_Precedent_Concept_Aliases
-  ' Range("All_Precedent_Map_Count").Value = Final_All_Precedent_Map_Count
-  ' Range("Match_Response").Value = Final_All_Match_Responses
-  ' Range("All_Similarities").Value = Final_All_Similarities
+  ' Adds the conditional formatting to the similarity column
+  Call Utils.color(To_Review_Headers(8))
 
   ' Program done.
+  Call Utils.Delete_Extra_Sheets
   Call Utils.Enable_Settings
   Call Utils.User_Exit
 
+
 Range_Error:
+  Call Utils.Delete_Extra_Sheets
   Call Utils.Enable_Settings
   Call Error_Handling.Range_Error
 
