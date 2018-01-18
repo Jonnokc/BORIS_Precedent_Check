@@ -1,20 +1,21 @@
+
 Function HotFuzz(ByVal S1 As String, ByVal S2 As String, Optional ByVal N As Boolean = True, Optional ByVal x As String = "", Optional ByVal w As Single = 2) As Single
-'Using Like operator for filtering, with added code to allow special characters in the input strings, including hyphen and the right bracket - passed in the 'x' parameter.
-'Use x & Chr(34) if you need to allow double quotes (") in the input strings
-'Allowing numbers in the input strings is optional (the 'n' parameter)
-'The 'w' parameter is the weight of "order" over "frequency" scores in the final score. Feel free to experiment, to get best matching results with your data.
-  Dim i As Integer
-  Dim d1 As Integer
-  Dim d2 As Integer
-  Dim y As String
-  Dim b As Boolean
-  Dim c As String
-  Dim a1 As String
-  Dim a2 As String
-  Dim k As Integer
-  Dim p As Integer
-  Dim f As Single
-  Dim o As Single
+  'Using Like operator for filtering, with added code to allow special characters in the input strings, including hyphen and the right bracket - passed in the 'x' parameter.
+  'Use x & Chr(34) if you need to allow double quotes (") in the input strings
+  'Allowing numbers in the input strings is optional (the 'n' parameter)
+  'The 'w' parameter is the weight of "order" over "frequency" scores in the final score. Feel free to experiment, to get best matching results with your data.
+  Dim i       As Integer
+  Dim d1      As Integer
+  Dim d2      As Integer
+  Dim y       As String
+  Dim b       As Boolean
+  Dim c       As String
+  Dim a1      As String
+  Dim a2      As String
+  Dim k       As Integer
+  Dim p       As Integer
+  Dim f       As Single
+  Dim o       As Single
   '
   '        ******* INPUT STRINGS CLEANSING *******
   '
